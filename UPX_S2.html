@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Encontre o ponto de troca mais próximo com a Ecotroca.">
+    <title>Ecotroca</title>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: Arial, sans-serif;
+            color: #20352b;
+            background: #f5f8f4;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            min-width: 320px;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .site-header {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            min-height: 88px;
+            padding: 20px 6%;
+            background: #fff;
+            border-bottom: 1px solid #e1e9e2;
+        }
+
+        .brand {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #26734d;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-decoration: none;
+        }
+
+        .main-nav,
+        .footer-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .main-nav a,
+        .footer-nav a {
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .main-nav a:hover,
+        .footer-nav a:hover {
+            color: #26734d;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        main {
+            width: min(100% - 40px, 1040px);
+            margin: 0 auto;
+            padding: 72px 0 88px;
+        }
+
+        .intro {
+            max-width: 720px;
+            margin: 0 auto 40px;
+            text-align: center;
+        }
+
+        .intro h1 {
+            margin: 0 0 16px;
+            color: #1d563a;
+            font-size: clamp(2rem, 5vw, 3rem);
+        }
+
+        .intro p {
+            margin: 0;
+            color: #52665a;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .how-it-works {
+            padding: 28px;
+            background: #fff;
+            border: 1px solid #e1e9e2;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgb(32 53 43 / 5%);
+        }
+
+        .how-it-works h2 {
+            margin: 0 0 12px;
+            color: #1d563a;
+        }
+
+        .how-it-works p {
+            margin: 0;
+            color: #52665a;
+            line-height: 1.7;
+        }
+
+        .map-placeholder {
+            display: grid;
+            min-height: 260px;
+            margin-top: 24px;
+            padding: 24px;
+            place-items: center;
+            color: #52665a;
+            text-align: center;
+            background: #eaf2e9;
+            border: 1px dashed #91ad98;
+            border-radius: 10px;
+        }
+
+        .site-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 28px 6%;
+            background: #203f30;
+            color: #fff;
+        }
+
+        .footer-logo {
+            color: #c9e8d0;
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-decoration: none;
+        }
+
+        @media (max-width: 760px) {
+            .site-header {
+                flex-direction: column;
+                justify-content: center;
+                gap: 18px;
+                padding: 18px 20px;
+            }
+
+            .brand {
+                position: static;
+                transform: none;
+            }
+
+            .main-nav,
+            .footer-nav {
+                justify-content: center;
+                gap: 12px 20px;
+            }
+
+            .site-footer {
+                flex-direction: column-reverse;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="#topo" aria-label="Ecotroca - voltar ao topo">ECOTROCA</a>
+        <nav class="main-nav" aria-label="Navegação principal">
+            <a href="sobre-nos.html">Sobre Nós</a>
+            <a href="contato.html">Contato</a>
+            <a href="ranking.html">Ranking</a>
+            <a href="perfil.html">Perfil</a>
+        </nav>
+    </header>
+
+    <main id="topo">
+        <section class="intro" aria-labelledby="titulo-principal">
+            <h1 id="titulo-principal">Troque perto de você</h1>
+            <p>
+                A Ecotroca ajuda você a encontrar o ponto de troca mais próximo e
+                contribui para uma comunidade mais sustentável.
+            </p>
+        </section>
+
+        <section class="how-it-works" aria-labelledby="como-funciona">
+            <h2 id="como-funciona">Como usar</h2>
+            <p>
+                Informe seu endereço e, com a integração da API do Google Maps,
+                o mapa mostrará os pontos disponíveis e traçará automaticamente
+                uma rota até o ponto mais próximo. Em breve, você poderá fazer
+                essa busca diretamente por aqui.
+            </p>
+            <div class="map-placeholder" aria-label="Espaço reservado para o mapa">
+                O mapa interativo e a busca de endereço aparecerão aqui.
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <nav class="footer-nav" aria-label="Navegação do rodapé">
+            <a href="sobre-nos.html">Sobre Nós</a>
+            <a href="contato.html">Contato</a>
+            <a href="ranking.html">Ranking</a>
+            <a href="perfil.html">Perfil</a>
+        </nav>
+        <a class="footer-logo" href="#topo" aria-label="Ecotroca - voltar ao topo">ECOTROCA</a>
+    </footer>
+</body>
+</html>
