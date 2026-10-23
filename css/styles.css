@@ -331,15 +331,16 @@ a:hover { color: var(--verde-900); text-decoration-thickness: 2px; }
 .mapa__aviso {
   position: absolute;
   inset: 0;
+  z-index: 5;
+  background: var(--verde-50);
   display: grid;
   place-content: center;
   gap: 0.75rem;
   padding: 2rem;
-  max-width: 44ch;
-  margin: 0 auto;
   color: var(--tinta-2);
   font-size: 0.98rem;
 }
+.mapa__aviso > * { max-width: 44ch; }
 .mapa__aviso strong { display: block; color: var(--tinta); font-family: var(--fonte-titulo); font-size: 1.25rem; }
 .mapa__aviso code { font-size: 0.9em; background: var(--papel-2); padding: 0.05em 0.35em; }
 

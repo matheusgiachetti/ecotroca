@@ -347,7 +347,9 @@ async function carregarDados() {
 function avisoNoMapa(titulo, texto) {
   const aviso = criar('div', 'mapa__aviso');
   aviso.append(criar('strong', null, titulo), criar('span', null, texto));
-  el.mapa.replaceChildren(aviso);
+  // Sobrepõe em vez de apagar: o Google pode ainda estar desenhando o mapa por baixo
+  el.mapa.querySelectorAll('.mapa__aviso').forEach((antigo) => antigo.remove());
+  el.mapa.append(aviso);
 }
 
 async function carregarMapa() {
