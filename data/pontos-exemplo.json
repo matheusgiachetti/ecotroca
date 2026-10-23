@@ -1,0 +1,62 @@
+[
+  {
+    "id": "exemplo-1",
+    "nome": "Ponto de exemplo 1 — substituir por ponto verificado",
+    "endereco": "Endereço de exemplo, Centro — Sorocaba/SP",
+    "latitude": -23.5008,
+    "longitude": -47.4581,
+    "horario": "Seg. a sex., 8h às 17h (exemplo)",
+    "residuos_aceitos": ["Celulares", "Pilhas e baterias", "Cabos e carregadores"],
+    "telefone": null,
+    "fonte": "Dado fictício para demonstração",
+    "verificado": false
+  },
+  {
+    "id": "exemplo-2",
+    "nome": "Ponto de exemplo 2 — substituir por ponto verificado",
+    "endereco": "Endereço de exemplo, Zona Norte — Sorocaba/SP",
+    "latitude": -23.4862,
+    "longitude": -47.4415,
+    "horario": "Seg. a sáb., 9h às 18h (exemplo)",
+    "residuos_aceitos": ["Computadores e periféricos", "Cabos e carregadores"],
+    "telefone": null,
+    "fonte": "Dado fictício para demonstração",
+    "verificado": false
+  },
+  {
+    "id": "exemplo-3",
+    "nome": "Ponto de exemplo 3 — substituir por ponto verificado",
+    "endereco": "Endereço de exemplo, Zona Oeste — Sorocaba/SP",
+    "latitude": -23.5168,
+    "longitude": -47.4688,
+    "horario": "Seg. a sex., 8h às 16h (exemplo)",
+    "residuos_aceitos": ["Pilhas e baterias"],
+    "telefone": null,
+    "fonte": "Dado fictício para demonstração",
+    "verificado": false
+  },
+  {
+    "id": "exemplo-4",
+    "nome": "Ponto de exemplo 4 — substituir por ponto verificado",
+    "endereco": "Endereço de exemplo, Zona Leste — Sorocaba/SP",
+    "latitude": -23.5254,
+    "longitude": -47.4362,
+    "horario": "Ter. a sáb., 10h às 19h (exemplo)",
+    "residuos_aceitos": ["Celulares", "Eletrodomésticos pequenos", "Computadores e periféricos"],
+    "telefone": null,
+    "fonte": "Dado fictício para demonstração",
+    "verificado": false
+  },
+  {
+    "id": "exemplo-5",
+    "nome": "Ponto de exemplo 5 — substituir por ponto verificado",
+    "endereco": "Endereço de exemplo, Zona Norte — Sorocaba/SP",
+    "latitude": -23.4771,
+    "longitude": -47.4733,
+    "horario": "Seg. a sex., 9h às 17h (exemplo)",
+    "residuos_aceitos": ["Celulares", "Pilhas e baterias", "Cabos e carregadores", "Eletrodomésticos pequenos"],
+    "telefone": null,
+    "fonte": "Dado fictício para demonstração",
+    "verificado": false
+  }
+]
