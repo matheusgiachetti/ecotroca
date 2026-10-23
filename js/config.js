@@ -16,7 +16,7 @@ export const GOOGLE_MAPS_API_KEY = 'COLE_AQUI_A_CHAVE_DO_GOOGLE_MAPS';
 export const GOOGLE_MAPS_MAP_ID = 'DEMO_MAP_ID';
 
 // Link do Google Forms de feedback. Enquanto for placeholder, o botão fica oculto.
-export const FEEDBACK_FORM_URL = 'COLE_AQUI_O_LINK_DO_GOOGLE_FORMS';
+export const FEEDBACK_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdOtf4Ovx7FxaVon2iBD1EKzEhrWQzS3q2Yaie1gTWmwUmgMg/viewform';
 
 // Região padrão do mapa: Sorocaba/SP
 export const CENTRO_PADRAO = { lat: -23.5015, lng: -47.4526 };
