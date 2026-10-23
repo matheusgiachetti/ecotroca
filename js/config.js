@@ -10,7 +10,7 @@ export const SUPABASE_URL = 'https://uqgqyqehykkxlnrnoxml.supabase.co';
 export const SUPABASE_ANON_KEY = 'sb_publishable_C8DJGlZlEpwJIot8J9vnPA_yOCpOIKj';
 
 // Google Maps JavaScript API (restrinja a chave por HTTP referrer — veja o README)
-export const GOOGLE_MAPS_API_KEY = 'COLE_AQUI_A_CHAVE_DO_GOOGLE_MAPS';
+export const GOOGLE_MAPS_API_KEY = 'AIzaSyCJrwUyHBoWQce8pHIc4GbI7sHp4jm9_sk';
 // Map ID (necessário para marcadores avançados). "DEMO_MAP_ID" funciona para testes;
 // para produção, crie um Map ID no Google Cloud (Map Management) e cole aqui.
 export const GOOGLE_MAPS_MAP_ID = 'DEMO_MAP_ID';

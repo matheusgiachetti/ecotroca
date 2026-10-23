@@ -26,7 +26,9 @@ function instalarCarregador(parametros) {
 
   const carregar = () =>
     promessa ||
-    (promessa = new Promise((resolve, reject) => {
+    (promessa = new Promise(async (resolve, reject) => {
+      // Espera um ciclo para registrar todas as bibliotecas pedidas em sequência
+      await Promise.resolve();
       const query = new URLSearchParams();
       query.set('libraries', [...bibliotecas].join(','));
       for (const [chave, valor] of Object.entries(parametros)) {

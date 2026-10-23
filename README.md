@@ -45,7 +45,7 @@ Abra <http://localhost:5173>. A geolocalização só funciona em `localhost` ou 
 |---|---|---|
 | `SUPABASE_URL` | ✅ preenchida | URL do projeto Supabase "ecotroca" |
 | `SUPABASE_ANON_KEY` | ✅ preenchida | chave **pública** (publishable). Pode ficar no navegador |
-| `GOOGLE_MAPS_API_KEY` | ⏳ placeholder | chave da Maps JavaScript API (veja abaixo) |
+| `GOOGLE_MAPS_API_KEY` | ✅ preenchida | chave do projeto Google Cloud `ecotroca-512512`, restrita por site e só para a Maps JavaScript API |
 | `GOOGLE_MAPS_MAP_ID` | `DEMO_MAP_ID` | Map ID; opcional trocar por um seu |
 | `FEEDBACK_FORM_URL` | ✅ preenchida | formulário "Ecotroca — Dê sua opinião" no Google Forms (conta do projeto). Se voltar a ser placeholder, o botão "Dê sua opinião" some |
 
@@ -69,6 +69,14 @@ Segurança: RLS ativo, política de `SELECT` para `anon`/`authenticated` e nenhu
 > Observação: projetos do plano gratuito pausam depois de um período sem uso. Se o site mostrar "Não foi possível carregar os pontos", abra o painel do Supabase e clique em **Restore project**.
 
 ## Chave do Google Maps (passo a passo)
+
+**Situação atual:** projeto `ecotroca-512512` criado no Google Cloud (conta do projeto), Maps JavaScript API ativada e chave "Ecotroca site (Maps JavaScript)" criada com:
+- restrição de API: só Maps JavaScript API;
+- restrição de sites: `https://ecotroca-xi.vercel.app/*`, `https://*.vercel.app/*`, `http://localhost:5173/*`, `http://127.0.0.1:5173/*`.
+
+Em 23/10/2026 o projeto ainda **não tinha conta de faturamento vinculada** (a conta Google do projeto não administra nenhuma), e mesmo assim o mapa carregou normalmente. O Google pode passar a exigir faturamento: se o mapa ficar escuro com a marca "For development purposes only", vá em **Faturamento → Vincular conta de faturamento** no projeto `ecotroca-512512`.
+
+Para refazer em outra conta:
 
 > A ativação da Maps JavaScript API exige uma **conta de faturamento** no Google Cloud (cartão cadastrado). Existe uma cota gratuita mensal que costuma cobrir um projeto acadêmico, mas confira os valores atuais na página de preços do Google Maps Platform e, se quiser, crie um alerta de orçamento.
 
