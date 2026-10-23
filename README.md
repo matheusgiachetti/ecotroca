@@ -4,6 +4,8 @@
 
 Plataforma web que ajuda quem descarta lixo eletrônico (REEE) a encontrar rapidamente o ponto de coleta correto mais próximo. Projeto da Usina de Projetos Experimentais (UPx) da Facens.
 
+**No ar:** <https://ecotroca-xi.vercel.app> (deploy automático a cada push na `main`).
+
 Site estático: HTML + CSS + JavaScript puro (ES modules), sem build e sem framework. Dados no Supabase, mapa no Google Maps.
 
 ---
@@ -79,8 +81,8 @@ Segurança: RLS ativo, política de `SELECT` para `anon`/`authenticated` e nenhu
    - **Restrições de aplicativo → Sites (referenciadores HTTP)**, adicione:
      - `http://localhost:*/*` (se o console não aceitar porta curinga, use `http://localhost:5173/*`)
      - `http://127.0.0.1:5173/*`
-     - `https://ecotroca.vercel.app/*` (ou o domínio que a Vercel der ao projeto)
-     - `https://*.vercel.app/*` (pré-visualizações; isso libera a chave para qualquer subdomínio vercel.app — se preferir, troque por `https://ecotroca-*.vercel.app/*`)
+     - `https://ecotroca-xi.vercel.app/*` (domínio de produção do projeto)
+     - `https://*.vercel.app/*` (pré-visualizações; isso libera a chave para qualquer subdomínio vercel.app — se preferir, troque por `https://ecotroca-*-teste-611a.vercel.app/*`)
    - **Restrições de API → Restringir chave → Maps JavaScript API**.
    - Salve.
 7. Cole a chave em `js/config.js` (`GOOGLE_MAPS_API_KEY`), faça commit e push. A Vercel publica sozinha.
@@ -90,12 +92,14 @@ Se a chave for recusada (domínio fora da lista, API não ativada), o site mostr
 
 ## Publicar na Vercel
 
-Deploy automático a cada push na `main`:
+Já publicado: projeto `ecotroca` no time `teste-611a`, ligado ao GitHub. Cada push na `main` gera um deploy de produção em <https://ecotroca-xi.vercel.app>. As URLs de pré-visualização (`*-teste-611a.vercel.app`) ficam protegidas por login da Vercel (padrão do plano); a URL de produção é pública.
+
+Para recriar em outra conta:
 
 1. Acesse <https://vercel.com/new> com sua conta.
 2. Em **Import Git Repository**, escolha `matheusgiachetti/ecotroca` (se não aparecer, clique em **Adjust GitHub App Permissions** e libere o repositório).
 3. **Framework Preset: Other**. Deixe Build Command e Output Directory vazios (site estático na raiz).
-4. Clique em **Deploy**. A URL fica parecida com `https://ecotroca.vercel.app`.
+4. Clique em **Deploy**. Se `ecotroca.vercel.app` já estiver em uso, a Vercel cria outro nome (aqui ficou `ecotroca-xi.vercel.app`).
 5. Adicione essa URL nas restrições da chave do Google Maps (passo 6 acima).
 
 ## Feedback (Google Forms)
@@ -134,6 +138,7 @@ Marque `verificado = true` só depois de confirmar com a fonte; o site mostra "V
 - **Localização automática:** o site só pede a localização quando a pessoa clica em "Encontrar ponto de coleta" ou "Usar minha localização". Se a permissão já foi dada antes, localiza sozinho ao abrir.
 - **Repositório GitHub:** criado público, como o repositório `UPX` original. O remoto antigo ficou com o nome `upx`.
 - **Logo:** `assets/logo.png` foi extraída da imagem enviada (fundo quadriculado removido). `assets/logo-original.png` guarda a imagem original.
+- **Domínio:** `ecotroca.vercel.app` já pertence a outra conta; o projeto ficou com `ecotroca-xi.vercel.app`. As tags `og:url`, `og:image` e `canonical` usam esse domínio — troque se configurar um domínio próprio.
 - O arquivo `UPX_S2.html` (estrutura inicial do grupo) foi mantido sem alterações.
 
 ## Próximos passos (fora do escopo atual)
