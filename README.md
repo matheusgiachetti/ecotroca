@@ -47,7 +47,7 @@ Abra <http://localhost:5173>. A geolocalização só funciona em `localhost` ou 
 | `SUPABASE_ANON_KEY` | ✅ preenchida | chave **pública** (publishable). Pode ficar no navegador |
 | `GOOGLE_MAPS_API_KEY` | ⏳ placeholder | chave da Maps JavaScript API (veja abaixo) |
 | `GOOGLE_MAPS_MAP_ID` | `DEMO_MAP_ID` | Map ID; opcional trocar por um seu |
-| `FEEDBACK_FORM_URL` | ⏳ placeholder | link do Google Forms. Enquanto for placeholder, o botão "Dê sua opinião" fica oculto |
+| `FEEDBACK_FORM_URL` | ✅ preenchida | formulário "Ecotroca — Dê sua opinião" no Google Forms (conta do projeto). Se voltar a ser placeholder, o botão "Dê sua opinião" some |
 
 Comportamento automático:
 - **Supabase não configurado** → carrega `data/pontos-exemplo.json` e mostra o aviso "Modo demonstração".
@@ -104,11 +104,36 @@ Para recriar em outra conta:
 
 ## Feedback (Google Forms)
 
-Crie o formulário, clique em **Enviar → link**, copie a URL (`https://docs.google.com/forms/...` ou `https://forms.gle/...`) e cole em `FEEDBACK_FORM_URL`. O link "Dê sua opinião" aparece abaixo da lista do mapa e no rodapé.
+Já criado e publicado (qualquer pessoa com o link responde, sem login e sem coletar e-mail). Perguntas: encontrou o ponto mais próximo? (obrigatória) · quanto tempo levou · facilidade de 1 a 5 (obrigatória) · aparelho usado · o que atrapalhou (texto livre) · usaria de verdade? As respostas ficam na aba **Respostas** do formulário, no Google Drive da conta.
 
-## Trocar os pontos de exemplo por pontos reais
+Para trocar por outro formulário: crie o formulário, clique em **Enviar → link**, copie a URL (`https://docs.google.com/forms/...` ou `https://forms.gle/...`) e cole em `FEEDBACK_FORM_URL`. O link "Dê sua opinião" aparece abaixo da lista do mapa e no rodapé.
 
-Os 5 pontos atuais são **fictícios** ("Ponto de exemplo N — substituir por ponto verificado").
+## Pontos de coleta
+
+### Situação atual (23/10/2026)
+
+Os pontos fictícios foram removidos do banco. Estão cadastrados 4 pontos **reais**, levantados em fontes públicas e marcados como **Em verificação** (`verificado = false`). O script está em `supabase/pontos-reais.sql`.
+
+| Ponto | Endereço | Fonte |
+|---|---|---|
+| Ecoponto Vila Helena | Rua Roque Sampaio, 100 | Prefeitura de Sorocaba, 01/09/2026 |
+| Ecoponto Brigadeiro Tobias | Rua José Sarti, 636 | Prefeitura de Sorocaba, 01/09/2026 |
+| Ecoponto Vila Hortência | Rua Lourenço Molineiro, 100 (posição aproximada) | Prefeitura de Sorocaba, 01/09/2026 |
+| Coletor da Sema (pilhas e pequenos eletrônicos) | Rua Santa Maria, 197 | Jornal Cruzeiro do Sul, 24/01/2024 |
+
+Os tipos aceitos nos Ecopontos foram traduzidos de "resíduos eletrônicos e eletrodomésticos" (texto da Prefeitura) para as categorias do site; pilhas não foram incluídas porque a fonte não cita.
+
+**Pendentes (fonte confiável, mas sem coordenada exata — não cadastrados para não levar ninguém ao lugar errado):**
+- Ecoponto Cajuru — Avenida Paraná, 3.200 (Prefeitura, 01/09/2026)
+- Ecoponto Júlio de Mesquita Filho — Avenida Domingues Martins, 100 (Prefeitura, 01/09/2026)
+- Ecoponto Aparecidinha — Estrada do Barreiro, 90 (Prefeitura, 01/09/2026)
+- Metareciclagem (computadores e informática) — Av. Dr. Armando Salles de Oliveira, 762, Trujillo · (15) 3417-3825 · seg. a sex., 8h às 16h (Jornal Cruzeiro do Sul, 24/01/2024)
+
+Para cadastrar: abra o endereço no Google Maps, clique com o botão direito no portão do local, copie as coordenadas e use o modelo de SQL abaixo. Depois de ligar para o 156 (Prefeitura) ou ir ao local, mude `verificado` para `true`.
+
+Fontes: [Prefeitura — Ecopontos](https://noticias.sorocaba.sp.gov.br/ecopontos-dao-destinacao-correta-a-aproximadamente-215-mil-metros-cubicos-de-residuos/), [Jornal Cruzeiro do Sul — eletrônicos](https://www.jornalcruzeiro.com.br/sorocaba/noticias/2024/01/728031-eletronicos-exigem-descarte-adequado.html), [Green Eletron — Sorocaba](https://greeneletron.org.br/blog/mora-em-sorocaba-saiba-onde-descartar-seus-eletroeletronicos-sem-uso/) (lista de 2020, não usada por estar desatualizada).
+
+### Como adicionar ou corrigir pontos
 
 1. Levante pontos reais no SINIR (<https://sinir.gov.br>), na prefeitura ou com os responsáveis pelos locais.
 2. Confira endereço, horário e o que cada ponto aceita. Pegue as coordenadas no Google Maps (clique com o botão direito no local → copie os números).
