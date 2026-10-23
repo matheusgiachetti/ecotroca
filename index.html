@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ecotroca — Encontre o ponto de coleta de lixo eletrônico mais próximo</title>
+  <meta name="description" content="Descubra onde descartar seu eletrônico perto de você. Celulares, pilhas, cabos e computadores: veja no mapa o ponto de coleta mais próximo em Sorocaba/SP.">
+  <meta name="theme-color" content="#FAF8F3">
+
+  <!-- Open Graph / compartilhamento -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:site_name" content="Ecotroca">
+  <meta property="og:title" content="Ecotroca — O caminho para um futuro sustentável">
+  <meta property="og:description" content="Descubra onde descartar seu eletrônico perto de você.">
+  <meta property="og:image" content="assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Placa de circuito verde em close">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Ícones derivados da logo -->
+  <link rel="icon" href="assets/favicon.ico" sizes="any">
+  <link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+  <!-- Fontes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650;12..96,750&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+
+  <!-- Foto do topo carregada com prioridade -->
+  <link rel="preload" as="image" type="image/webp"
+        imagesrcset="assets/hero-768.webp 768w, assets/hero-1280.webp 1280w, assets/hero-2000.webp 2000w"
+        imagesizes="100vw" fetchpriority="high">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="pular" href="#mapa">Pular para o mapa</a>
+
+  <header class="topo" id="topo">
+    <div class="topo__barra">
+      <a class="topo__marca" href="#inicio" aria-label="Ecotroca, voltar ao início">
+        <img src="assets/logo-320.png" alt="Ecotroca" width="160" height="82" decoding="async">
+      </a>
+      <button class="topo__menu" type="button" aria-expanded="false" aria-controls="menu-principal">
+        Menu
+      </button>
+      <nav class="menu" id="menu-principal" aria-label="Navegação principal">
+        <ul>
+          <li><a href="#inicio">Início</a></li>
+          <li><a href="#mapa">Mapa</a></li>
+          <li><a href="#como-funciona">Como funciona</a></li>
+          <li><a href="#o-que-descartar">O que descartar</a></li>
+          <li><a href="#duvidas">Dúvidas</a></li>
+          <li><a href="#sobre">Sobre</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ INÍCIO ============ -->
+    <section class="hero" id="inicio" aria-labelledby="hero-titulo">
+      <picture class="hero__foto">
+        <source type="image/webp"
+                srcset="assets/hero-768.webp 768w, assets/hero-1280.webp 1280w, assets/hero-2000.webp 2000w"
+                sizes="100vw">
+        <img src="assets/hero-1280.jpg"
+             srcset="assets/hero-768.jpg 768w, assets/hero-1280.jpg 1280w, assets/hero-2000.jpg 2000w"
+             sizes="100vw" width="2000" height="1335" fetchpriority="high" decoding="async"
+             alt="Close de uma placa de circuito verde com chips e pequenos componentes eletrônicos">
+      </picture>
+      <div class="hero__conteudo">
+        <p class="hero__sobretitulo">O caminho para um futuro sustentável</p>
+        <h1 class="hero__titulo" id="hero-titulo">Seu eletrônico velho tem lugar certo.</h1>
+        <p class="hero__apoio">Descubra onde descartar seu eletrônico perto de você. Sem cadastro, em poucos segundos.</p>
+        <div class="hero__acoes">
+          <a class="botao botao--claro" href="#mapa" data-acao="localizar">Encontrar ponto de coleta</a>
+          <a class="hero__link" href="#como-funciona">Como funciona</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MAPA ============ -->
+    <section class="secao mapa" id="mapa" aria-labelledby="mapa-titulo">
+      <div class="mapa__cabecalho">
+        <div>
+          <p class="sobretitulo">Mapa</p>
+          <h2 id="mapa-titulo">Pontos de coleta perto de você</h2>
+          <p class="mapa__intro">Permita a localização e veja primeiro o ponto mais próximo.</p>
+        </div>
+        <div class="mapa__ferramentas">
+          <button class="botao" type="button" id="botao-localizacao">
+            <svg class="botao__icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="12" cy="12" r="7" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+            <span>Usar minha localização</span>
+          </button>
+          <p class="mapa__status" id="status-localizacao" role="status" aria-live="polite">Mostrando pontos em Sorocaba/SP.</p>
+        </div>
+      </div>
+
+      <p class="aviso-demo" id="aviso-demo" hidden>
+        <strong>Modo demonstração.</strong> Os pontos abaixo são fictícios e servem só para teste.
+      </p>
+
+      <div class="filtros" role="group" aria-label="Filtrar por tipo de resíduo" id="filtros"></div>
+
+      <div class="mapa__corpo">
+        <div class="mapa__mapa" id="mapa-google" role="region" aria-label="Mapa dos pontos de coleta">
+          <p class="mapa__aviso" id="mapa-carregando">Carregando o mapa…</p>
+        </div>
+        <div class="mapa__lista">
+          <p class="lista__contagem" id="lista-contagem" aria-live="polite"></p>
+          <ol class="lista" id="lista-pontos" aria-busy="true" aria-label="Pontos de coleta">
+            <li class="lista__estado">Carregando pontos de coleta…</li>
+          </ol>
+          <p class="opiniao" data-feedback hidden>
+            Usou o mapa? <a href="#" data-feedback-link target="_blank" rel="noopener">Dê sua opinião</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ COMO FUNCIONA ============ -->
+    <section class="secao passos" id="como-funciona" aria-labelledby="passos-titulo">
+      <div class="passos__topo">
+        <p class="sobretitulo">Como funciona</p>
+        <h2 id="passos-titulo">Três passos. Poucos segundos.</h2>
+      </div>
+      <ol class="passos__lista">
+        <li class="passo">
+          <span class="passo__numero" aria-hidden="true">01</span>
+          <h3>Permita a localização</h3>
+          <p>Toque em “Usar minha localização”. Sua posição fica só no seu navegador e não é salva.</p>
+        </li>
+        <li class="passo">
+          <span class="passo__numero" aria-hidden="true">02</span>
+          <h3>Veja o ponto mais próximo</h3>
+          <p>A lista se organiza pela distância. O primeiro ponto ganha o selo “Mais próximo”.</p>
+        </li>
+        <li class="passo">
+          <span class="passo__numero" aria-hidden="true">03</span>
+          <h3>Siga até lá</h3>
+          <p>Confira o horário e o que o ponto aceita. Depois, toque em “Como chegar” para abrir a rota.</p>
+        </li>
+      </ol>
+      <a class="botao botao--claro passos__acao" href="#mapa" data-acao="localizar">Encontrar ponto de coleta</a>
+    </section>
+
+    <!-- ============ O QUE DESCARTAR ============ -->
+    <section class="secao descarte" id="o-que-descartar" aria-labelledby="descarte-titulo">
+      <figure class="descarte__foto">
+        <picture>
+          <source type="image/webp" srcset="assets/descarte-700.webp 700w, assets/descarte-1200.webp 1200w"
+                  sizes="(min-width: 900px) 45vw, 100vw">
+          <img src="assets/descarte-700.jpg" srcset="assets/descarte-700.jpg 700w, assets/descarte-1200.jpg 1200w"
+               sizes="(min-width: 900px) 45vw, 100vw" width="1200" height="800" loading="lazy" decoding="async"
+               alt="Monte de cabos, fios, carregadores e pequenos aparelhos eletrônicos descartados">
+        </picture>
+      </figure>
+      <div class="descarte__texto">
+        <p class="sobretitulo">O que descartar</p>
+        <h2 id="descarte-titulo">Ligou na tomada ou usa bateria? Vai para a coleta.</h2>
+        <ul class="descarte__lista">
+          <li><span class="descarte__item">Celulares</span><span class="descarte__nota">Antigos, quebrados ou parados na gaveta. Apague seus dados antes.</span></li>
+          <li><span class="descarte__item">Pilhas e baterias</span><span class="descarte__nota">Comuns, recarregáveis e baterias de celular, notebook ou câmera.</span></li>
+          <li><span class="descarte__item">Cabos e carregadores</span><span class="descarte__nota">Fios, fontes, fones de ouvido e adaptadores.</span></li>
+          <li><span class="descarte__item">Computadores e periféricos</span><span class="descarte__nota">Notebooks, teclados, mouses, monitores e impressoras.</span></li>
+          <li><span class="descarte__item">Eletrodomésticos pequenos</span><span class="descarte__nota">Secadores, liquidificadores, ferros de passar e rádios.</span></li>
+        </ul>
+        <p class="descarte__alerta">Nem todo ponto aceita tudo. Confira os itens aceitos nos detalhes de cada ponto. Bateria estufada? Não perfure nem tente remover: leve o aparelho como está e avise no local.</p>
+      </div>
+    </section>
+
+    <!-- ============ DÚVIDAS ============ -->
+    <section class="secao duvidas" id="duvidas" aria-labelledby="duvidas-titulo">
+      <div class="duvidas__lado">
+        <p class="sobretitulo">Dúvidas</p>
+        <h2 id="duvidas-titulo">Perguntas frequentes</h2>
+        <p>Respostas curtas para o que mais aparece na hora de descartar.</p>
+      </div>
+      <div class="duvidas__lista">
+        <details class="pergunta">
+          <summary>O que é lixo eletrônico?</summary>
+          <div class="pergunta__resposta">
+            <p>É todo equipamento elétrico ou eletrônico que parou de funcionar ou não é mais usado, junto com suas partes, como cabos, pilhas e baterias. O nome técnico é REEE: resíduos de equipamentos eletroeletrônicos.</p>
+          </div>
+        </details>
+        <details class="pergunta">
+          <summary>Posso jogar pilha no lixo comum?</summary>
+          <div class="pergunta__resposta">
+            <p>Não é o indicado. Pilhas e baterias têm metais e outras substâncias que podem contaminar o solo e a água. Baterias amassadas também podem pegar fogo.</p>
+            <p>A Política Nacional de Resíduos Sólidos (Lei nº 12.305/2010) inclui pilhas, baterias e eletroeletrônicos na logística reversa. Na prática: guarde em um pote fechado e entregue em um ponto de coleta.</p>
+          </div>
+        </details>
+        <details class="pergunta">
+          <summary>Preciso apagar meus dados antes de descartar um celular?</summary>
+          <div class="pergunta__resposta">
+            <p>Sim. Faça uma cópia do que quer guardar, saia das suas contas, restaure o aparelho para as configurações de fábrica e retire o chip e o cartão de memória.</p>
+            <p>Os passos mudam conforme o modelo. Na dúvida, consulte o manual ou o site do fabricante.</p>
+          </div>
+        </details>
+        <details class="pergunta">
+          <summary>O que acontece com o lixo eletrônico descartado errado?</summary>
+          <div class="pergunta__resposta">
+            <p>No lixo comum, ele pode acabar em aterros ou em locais inadequados. Ali, substâncias como chumbo e mercúrio podem vazar e contaminar o ambiente. Também se perdem materiais que poderiam ser reaproveitados, como metais e plásticos.</p>
+            <p>Na coleta certa, o resíduo segue para empresas que separam e dão o destino adequado a cada parte.</p>
+          </div>
+        </details>
+        <details class="pergunta">
+          <summary>Todo ponto aceita qualquer aparelho?</summary>
+          <div class="pergunta__resposta">
+            <p>Não. Cada ponto define o que recebe. Alguns aceitam só pilhas; outros, celulares ou computadores. Antes de sair, veja os itens aceitos nos detalhes do ponto e, se puder, ligue para confirmar.</p>
+          </div>
+        </details>
+        <details class="pergunta">
+          <summary>As informações dos pontos são confiáveis?</summary>
+          <div class="pergunta__resposta">
+            <p>Cada ponto mostra o status “Verificado” ou “Em verificação” e a fonte da informação. Horários e itens aceitos podem mudar, então vale confirmar com o local antes de ir.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ SOBRE ============ -->
+    <section class="secao sobre" id="sobre" aria-labelledby="sobre-titulo">
+      <p class="sobretitulo">Sobre</p>
+      <h2 id="sobre-titulo" class="sobre__titulo">Um projeto para tornar o descarte correto simples.</h2>
+      <div class="sobre__texto">
+        <p>A Ecotroca é um projeto da Usina de Projetos Experimentais (UPx) da Facens. O objetivo é facilitar o descarte correto de eletrônicos, mostrando o ponto de coleta certo mais perto de você.</p>
+        <p>A ideia nasceu de um projeto técnico anterior e agora ganha a forma de uma plataforma web aberta, pensada para crescer aos poucos.</p>
+      </div>
+      <dl class="sobre__fatos">
+        <div><dt>Instituição</dt><dd>Facens — Usina de Projetos Experimentais</dd></div>
+        <div><dt>Origem</dt><dd>Projeto técnico prévio</dd></div>
+        <div><dt>Região inicial</dt><dd>Sorocaba/SP</dd></div>
+      </dl>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <div class="rodape__linha">
+      <a href="#inicio" class="rodape__marca" aria-label="Ecotroca, voltar ao início">
+        <img src="assets/logo-320.png" alt="Ecotroca" width="110" height="56" loading="lazy">
+      </a>
+      <p class="rodape__slogan">O caminho para um futuro sustentável.</p>
+      <p class="rodape__opiniao" data-feedback hidden>
+        <a href="#" data-feedback-link target="_blank" rel="noopener">Dê sua opinião</a>
+      </p>
+    </div>
+    <div class="rodape__linha rodape__linha--fina">
+      <p>Projeto da UPx · Facens</p>
+      <p class="rodape__creditos">
+        Fotos:
+        <a href="https://unsplash.com/@cdr6934?utm_source=ecotroca&amp;utm_medium=referral">Chris Ried</a> e
+        <a href="https://unsplash.com/@eugenivy_now?utm_source=ecotroca&amp;utm_medium=referral">Eugenia Pan'kiv</a>
+        no <a href="https://unsplash.com/?utm_source=ecotroca&amp;utm_medium=referral">Unsplash</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
