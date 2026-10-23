@@ -1,0 +1,16 @@
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ferramentas locais
+.claude/
+.vscode/
+.idea/
+.vercel/
+node_modules/
+
+# Segredos (nunca versionar)
+.env
+.env.*
+*.local
