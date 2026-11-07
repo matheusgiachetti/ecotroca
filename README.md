@@ -23,6 +23,7 @@ js/data.js              pontos de coleta no Supabase (ou JSON de exemplo no modo
 js/conta.js             painéis de conta e de registrar descarte (<dialog>)
 js/ranking.js           seção Ranking (top 10 por período e cidade)
 js/regras.js            seção "Como os pontos funcionam" (lê regras_pontos() do banco)
+js/tema.js              tema claro, escuro e automático (botão no menu)
 privacidade.html, termos.html  Política de Privacidade e Termos de uso (versão para revisão)
 js/geo.js               geolocalização, distância (Haversine) e link "Como chegar"
 data/pontos-exemplo.json   pontos fictícios do modo demonstração
@@ -259,6 +260,10 @@ Seção **Ranking** na página: top 10 por **Semana** (segunda a domingo), **Mê
 - **Excluir minha conta:** em Minha conta, exige digitar o apelido. Chama `excluir_minha_conta()` (`supabase/08-excluir-conta.sql`, `SECURITY DEFINER`, só logado, sem parâmetros: só apaga a própria conta). A linha de `auth.users` é apagada e `profiles`, `descartes` e `usuario_medalhas` saem em **cascata**; a exclusão não deixa dado órfão. Depois a pessoa sai da sessão e vê a mensagem de conta excluída.
 
 > **Ordem de aplicação:** rode `supabase/08-excluir-conta.sql` no SQL Editor ANTES de publicar. Sem ele, o botão "Excluir minha conta" mostra "Não foi possível excluir a conta agora".
+
+## Tema claro, escuro e automático
+
+O menu tem três botões: **Automático** (segue o aparelho), **Claro** e **Escuro**. A escolha fica no navegador (`localStorage`, chave `ecotroca-tema`); se o navegador bloquear o armazenamento, o site funciona do mesmo jeito e só não lembra a escolha. As cores estão todas em variáveis no topo de `css/styles.css` (claro em `:root`; escuro em `:root[data-theme="dark"]` e no `@media (prefers-color-scheme: dark)`, com os mesmos valores nos dois). O hero mantém texto claro sobre a foto nos dois temas, e o mapa do Google continua claro. Ao criar uma cor nova, defina-a nos dois temas e confira o contraste (o `tests/test_20_tema.py` falha se algum par cair abaixo de 4,5:1).
 
 ## Próximos passos (fora do escopo atual)
 

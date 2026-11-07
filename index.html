@@ -36,7 +36,10 @@
         imagesrcset="assets/hero-768.webp 768w, assets/hero-1280.webp 1280w, assets/hero-2000.webp 2000w"
         imagesizes="100vw" fetchpriority="high">
 
+  <!-- Aplica o tema salvo antes de desenhar a página (sem piscar). Sem localStorage, vale o automático. -->
+  <script>try{var t=localStorage.getItem('ecotroca-tema');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
   <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/tema.js"></script>
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
@@ -60,6 +63,13 @@
           <li><a href="#o-que-descartar">O que descartar</a></li>
           <li><a href="#duvidas">Dúvidas</a></li>
           <li><a href="#sobre">Sobre</a></li>
+          <li class="menu__tema">
+            <div class="tema" role="group" aria-label="Tema de cores">
+              <button type="button" class="tema__opcao" data-tema="auto" aria-pressed="true" title="Automático"><svg class="tema__icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 2v16a8 8 0 0 1 0-16Z"/></svg><span class="tema__rotulo">Automático</span></button>
+              <button type="button" class="tema__opcao" data-tema="light" aria-pressed="false" title="Claro"><svg class="tema__icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0-5h0a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 17a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1ZM2 12a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Zm17 0a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2h-2a1 1 0 0 1-1-1ZM4.9 4.9a1 1 0 0 1 1.4 0l1.4 1.4a1 1 0 0 1-1.4 1.4L4.9 6.3a1 1 0 0 1 0-1.4Zm11.4 11.4a1 1 0 0 1 1.4 0l1.4 1.4a1 1 0 0 1-1.4 1.4l-1.4-1.4a1 1 0 0 1 0-1.4ZM19.1 4.9a1 1 0 0 1 0 1.4l-1.4 1.4a1 1 0 1 1-1.4-1.4l1.4-1.4a1 1 0 0 1 1.4 0ZM7.7 16.3a1 1 0 0 1 0 1.4l-1.4 1.4a1 1 0 1 1-1.4-1.4l1.4-1.4a1 1 0 0 1 1.4 0Z"/></svg><span class="tema__rotulo">Claro</span></button>
+              <button type="button" class="tema__opcao" data-tema="dark" aria-pressed="false" title="Escuro"><svg class="tema__icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg><span class="tema__rotulo">Escuro</span></button>
+            </div>
+          </li>
           <li class="menu__conta" data-conta>
             <button type="button" class="menu__entrar" data-conta-abrir aria-haspopup="dialog">Entrar</button>
             <button type="button" class="menu__sair" data-conta-sair hidden>Sair</button>

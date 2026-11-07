@@ -16,7 +16,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650;12..96,750&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+  <!-- Aplica o tema salvo antes de desenhar a página (sem piscar). Sem localStorage, vale o automático. -->
+  <script>try{var t=localStorage.getItem('ecotroca-tema');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
   <link rel="stylesheet" href="/css/styles.css">
+  <script type="module" src="/js/tema.js"></script>
 </head>
 <body>
   <a class="pular" href="#conteudo">Pular para o conteúdo</a>
