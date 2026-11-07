@@ -14,6 +14,7 @@ Site estático: HTML + CSS + JavaScript puro (ES modules), sem build e sem frame
 
 ```
 index.html              página única (Início, Mapa, Como funciona, O que descartar, Dúvidas, Sobre)
+404.html                página "não encontrada" (a Vercel serve em qualquer endereço inexistente)
 css/styles.css          estilos (mobile-first)
 js/config.js            chaves e configurações públicas (placeholders começam com "COLE_")
 js/main.js              interface: lista, filtros, detalhes, menu, animações
@@ -23,8 +24,11 @@ js/geo.js               geolocalização, distância (Haversine) e link "Como ch
 data/pontos-exemplo.json   pontos fictícios do modo demonstração
 supabase/schema.sql     tabela pontos_coleta + RLS
 supabase/seed.sql       5 pontos de EXEMPLO (fictícios)
+supabase/pontos-reais.sql  4 pontos reais de Sorocaba (em verificação)
 assets/                 logo, ícones e fotos otimizadas
 vercel.json             cabeçalhos para a hospedagem estática
+tests/                  testes automáticos (Playwright em Python)
+.github/workflows/      leitura diária para o Supabase gratuito não pausar
 ```
 
 ## Rodar localmente
@@ -38,6 +42,23 @@ python -m http.server 5173
 Abra <http://localhost:5173>. A geolocalização só funciona em `localhost` ou HTTPS.
 
 > Abrir o `index.html` direto pelo explorador de arquivos (`file://`) não funciona: os módulos JS precisam de um servidor.
+
+> Use a porta **5173**: é a única liberada na chave do Google Maps. Em outra porta o mapa mostra "Não foi possível exibir o mapa" (a lista continua funcionando).
+
+## Testes
+
+Testes automáticos com Playwright em Python (não precisa de Node nem de `package.json`):
+
+```bash
+python -m pip install -r tests/requirements.txt
+python -m playwright install chromium
+python -m http.server 5173          # em outro terminal
+python -m pytest tests              # testa http://localhost:5173
+```
+
+Para testar o site publicado: `BASE_URL=https://ecotroca-xi.vercel.app python -m pytest tests` (no PowerShell: `$env:BASE_URL="https://ecotroca-xi.vercel.app"; python -m pytest tests`).
+
+Os testes leem os pontos direto do Supabase e conferem: mapa e marcadores, aviso de chave recusada, localização (emulada), detalhes do ponto, filtros, seções, feedback, layout em 320/375/768/1280 px, alvos de toque, `<head>`, página 404, permissões do banco (a chave pública só lê), segredos no histórico do git, `innerHTML`, imagens, teclado, contraste e WCAG AA (axe-core). Precisam de internet.
 
 ## Configuração (`js/config.js`)
 
@@ -57,7 +78,7 @@ Comportamento automático:
 
 ## Supabase
 
-O projeto `ecotroca` (organização "ecotroca") já está criado, com a tabela e os 5 pontos de exemplo aplicados.
+O projeto `ecotroca` (organização "ecotroca") já está criado, com a tabela e os 4 pontos reais de `supabase/pontos-reais.sql` (os de exemplo foram removidos).
 
 Para recriar do zero em outro projeto:
 1. Crie um projeto em <https://supabase.com/dashboard> (plano gratuito; região São Paulo `sa-east-1`, se quiser).
@@ -66,7 +87,7 @@ Para recriar do zero em outro projeto:
 
 Segurança: RLS ativo, política de `SELECT` para `anon`/`authenticated` e nenhuma política de escrita. Ou seja, com a chave pública só é possível ler. Alterações são feitas pelo painel do Supabase.
 
-> Observação: projetos do plano gratuito pausam depois de um período sem uso. Se o site mostrar "Não foi possível carregar os pontos", abra o painel do Supabase e clique em **Restore project**.
+> **Pausa por inatividade:** projetos do plano gratuito pausam quando recebem poucas consultas em 7 dias. Isso aconteceu (o projeto foi reativado em 07/11/2026). Para evitar, o workflow `.github/workflows/manter-supabase-ativo.yml` faz uma leitura por dia com a chave pública; se a leitura falhar, o GitHub manda um e-mail. O GitHub desliga workflows agendados depois de 60 dias sem commits no repositório: se isso acontecer, reative em **Actions → Manter o Supabase ativo → Enable workflow**. Se o site mostrar "Não foi possível carregar os pontos", abra o painel do Supabase e clique em **Restore project**.
 
 ## Chave do Google Maps (passo a passo)
 
@@ -169,7 +190,7 @@ Marque `verificado = true` só depois de confirmar com a fonte; o site mostra "V
 - **`residuos_aceitos`** foi criado como `text[] not null default '{}'` (lista vazia em vez de nulo) e a tabela ganhou validações simples (nome/endereço preenchidos, latitude/longitude válidas).
 - **Map ID:** os marcadores avançados (`AdvancedMarkerElement`) exigem um Map ID; usamos `DEMO_MAP_ID` até existir um próprio.
 - **Localização automática:** o site só pede a localização quando a pessoa clica em "Encontrar ponto de coleta" ou "Usar minha localização". Se a permissão já foi dada antes, localiza sozinho ao abrir.
-- **Repositório GitHub:** criado público, como o repositório `UPX` original. O remoto antigo ficou com o nome `upx`.
+- **Repositório GitHub:** criado público, como o repositório `UPX` original.
 - **Logo:** `assets/logo.png` foi extraída da imagem enviada (fundo quadriculado removido). `assets/logo-original.png` guarda a imagem original.
 - **Domínio:** `ecotroca.vercel.app` já pertence a outra conta; o projeto ficou com `ecotroca-xi.vercel.app`. As tags `og:url`, `og:image` e `canonical` usam esse domínio — troque se configurar um domínio próprio.
 - O arquivo `UPX_S2.html` (estrutura inicial do grupo) foi mantido sem alterações.
@@ -180,6 +201,6 @@ Login, cadastro, pontuação/recompensas, ranking, métricas de impacto e painel
 
 ## Créditos
 
-- Foto do topo: [Chris Ried](https://unsplash.com/@cdr6934?utm_source=ecotroca&utm_medium=referral) no [Unsplash](https://unsplash.com/?utm_source=ecotroca&utm_medium=referral).
+- Foto do topo (também usada na página 404): [Chris Ried](https://unsplash.com/@cdr6934?utm_source=ecotroca&utm_medium=referral) no [Unsplash](https://unsplash.com/?utm_source=ecotroca&utm_medium=referral).
 - Foto de cabos: [Eugenia Pan'kiv](https://unsplash.com/@eugenivy_now?utm_source=ecotroca&utm_medium=referral) no [Unsplash](https://unsplash.com/?utm_source=ecotroca&utm_medium=referral).
 - Fontes: Bricolage Grotesque e Instrument Sans (Google Fonts); título do topo em Times New Roman.
