@@ -58,6 +58,10 @@
           <li><a href="#o-que-descartar">O que descartar</a></li>
           <li><a href="#duvidas">Dúvidas</a></li>
           <li><a href="#sobre">Sobre</a></li>
+          <li class="menu__conta" data-conta>
+            <button type="button" class="menu__entrar" data-conta-abrir aria-haspopup="dialog">Entrar</button>
+            <button type="button" class="menu__sair" data-conta-sair hidden>Sair</button>
+          </li>
         </ul>
       </nav>
     </div>
@@ -262,5 +266,110 @@
       </p>
     </div>
   </footer>
+
+  <!-- ============ PAINEL DA CONTA (entrar, criar conta, minha conta) ============ -->
+  <dialog class="painel" id="painel-conta" aria-labelledby="conta-titulo">
+    <div class="painel__corpo">
+      <div class="painel__topo">
+        <div>
+          <p class="sobretitulo" id="conta-sobretitulo">Conta</p>
+          <h2 class="painel__titulo" id="conta-titulo" tabindex="-1">Entrar</h2>
+        </div>
+        <button class="painel__fechar" type="button" data-fechar>Fechar</button>
+      </div>
+      <p class="painel__aviso" id="conta-aviso" role="status" hidden></p>
+
+      <form class="form" id="form-entrar" data-vista="entrar" novalidate>
+        <div class="campo">
+          <label for="entrar-email">E-mail</label>
+          <input id="entrar-email" name="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="campo">
+          <label for="entrar-senha">Senha</label>
+          <input id="entrar-senha" name="senha" type="password" autocomplete="current-password" required>
+        </div>
+        <p class="form__erro" role="alert"></p>
+        <button class="botao" type="submit">Entrar</button>
+        <p class="form__troca">Ainda não tem conta? <button class="botao-texto" type="button" data-ir-vista="criar">Criar conta</button></p>
+      </form>
+
+      <form class="form" id="form-criar" data-vista="criar" novalidate hidden>
+        <div class="campo">
+          <label for="criar-email">E-mail</label>
+          <input id="criar-email" name="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="campo">
+          <label for="criar-apelido">Apelido</label>
+          <input id="criar-apelido" name="apelido" type="text" autocomplete="nickname" maxlength="20" spellcheck="false" autocapitalize="off" required aria-describedby="criar-apelido-dica">
+          <p class="campo__dica" id="criar-apelido-dica">De 3 a 20 caracteres: letras, números e _. Outras pessoas poderão ver.</p>
+        </div>
+        <div class="campo">
+          <label for="criar-senha">Senha</label>
+          <input id="criar-senha" name="senha" type="password" autocomplete="new-password" minlength="6" required aria-describedby="criar-senha-dica">
+          <p class="campo__dica" id="criar-senha-dica">Pelo menos 6 caracteres.</p>
+        </div>
+        <p class="form__erro" role="alert"></p>
+        <button class="botao" type="submit">Criar conta</button>
+        <p class="form__troca">Já tem conta? <button class="botao-texto" type="button" data-ir-vista="entrar">Entrar</button></p>
+      </form>
+
+      <section class="resumo" id="vista-conta" data-vista="conta" aria-label="Resumo da conta" hidden>
+        <p class="resumo__rotulo">Nível</p>
+        <p class="resumo__nivel" id="resumo-nivel">—</p>
+        <progress class="nivel__barra" id="resumo-barra" max="1" value="0" aria-labelledby="resumo-proximo"></progress>
+        <p class="resumo__proximo" id="resumo-proximo">Carregando…</p>
+        <dl class="resumo__dados">
+          <div><dt>Pontos</dt><dd id="resumo-pontos">—</dd></div>
+          <div><dt>Descartes</dt><dd id="resumo-descartes">—</dd></div>
+          <div><dt>Itens</dt><dd id="resumo-itens">—</dd></div>
+          <div><dt>Peso estimado</dt><dd id="resumo-kg">—</dd></div>
+        </dl>
+        <p class="form__erro" role="alert" id="resumo-erro"></p>
+        <button class="botao botao--suave" type="button" data-conta-sair-painel>Sair</button>
+      </section>
+    </div>
+  </dialog>
+
+  <!-- ============ PAINEL DE REGISTRAR DESCARTE ============ -->
+  <dialog class="painel" id="painel-descarte" aria-labelledby="painel-descarte-titulo" data-foco="titulo">
+    <div class="painel__corpo">
+      <div class="painel__topo">
+        <div>
+          <p class="sobretitulo">Registrar descarte</p>
+          <h2 class="painel__titulo" id="painel-descarte-titulo" tabindex="-1"></h2>
+        </div>
+        <button class="painel__fechar" type="button" data-fechar>Fechar</button>
+      </div>
+
+      <form class="form" id="form-descarte" novalidate>
+        <fieldset class="grupo">
+          <legend>Tipo de resíduo</legend>
+          <div class="opcoes" id="descarte-tipos" aria-busy="true"></div>
+        </fieldset>
+        <div class="campo campo--curto">
+          <label for="descarte-quantidade">Quantidade de itens (1 a 10)</label>
+          <input id="descarte-quantidade" name="quantidade" type="number" min="1" max="10" step="1" value="1" inputmode="numeric">
+        </div>
+        <p class="descarte__previa" id="descarte-previa"></p>
+        <p class="painel__nota">Ao confirmar, o site pede a sua localização para conferir que você está a até 200 m do ponto. Ela não é guardada.</p>
+        <p class="form__erro" role="alert" id="descarte-erro"></p>
+        <p class="form__status" role="status" aria-live="polite" id="descarte-status"></p>
+        <button class="botao" type="submit" id="descarte-confirmar">Confirmar descarte</button>
+      </form>
+
+      <section class="resultado" id="descarte-resultado" aria-label="Resultado do registro" hidden>
+        <p class="resultado__titulo">Descarte registrado</p>
+        <p class="resultado__texto" id="descarte-resultado-texto"></p>
+        <p class="resultado__peso" id="descarte-resultado-peso"></p>
+        <div class="ponto__acoes">
+          <button class="botao" type="button" id="descarte-outro">Registrar outro</button>
+          <button class="botao botao--suave" type="button" data-fechar>Fechar</button>
+        </div>
+      </section>
+    </div>
+  </dialog>
+
+  <!-- Anúncios para leitores de tela (entrou, saiu, descarte registrado) -->
+  <p class="sr-only" id="anuncio" role="status" aria-live="polite" aria-atomic="true"></p>
 </body>
 </html>
