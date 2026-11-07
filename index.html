@@ -54,6 +54,7 @@
         <ul>
           <li><a href="#inicio">Início</a></li>
           <li><a href="#mapa">Mapa</a></li>
+          <li data-ranking-nav><a href="#ranking">Ranking</a></li>
           <li><a href="#como-funciona">Como funciona</a></li>
           <li><a href="#o-que-descartar">O que descartar</a></li>
           <li><a href="#duvidas">Dúvidas</a></li>
@@ -126,6 +127,31 @@
             Usou o mapa? <a href="#" data-feedback-link target="_blank" rel="noopener" aria-label="Dê sua opinião (abre o Google Forms em nova aba)">Dê sua opinião</a>
           </p>
         </div>
+      </div>
+    </section>
+
+    <!-- ============ RANKING ============ -->
+    <section class="secao ranking" id="ranking" aria-labelledby="ranking-titulo">
+      <div class="ranking__lado">
+        <p class="sobretitulo">Ranking</p>
+        <h2 id="ranking-titulo">Quem mais descartou</h2>
+        <p class="ranking__intro">Aparecem só o apelido e a cidade de quem pontuou. Para entrar na lista, registre seus descartes nos pontos de coleta.</p>
+        <div class="filtros" role="group" aria-label="Período do ranking" id="ranking-periodos">
+          <button class="filtro" type="button" data-periodo="semana" aria-pressed="true">Semana</button>
+          <button class="filtro" type="button" data-periodo="mes" aria-pressed="false">Mês</button>
+          <button class="filtro" type="button" data-periodo="geral" aria-pressed="false">Geral</button>
+        </div>
+        <div class="filtros" role="group" aria-label="Cidades do ranking" id="ranking-cidades">
+          <button class="filtro" type="button" data-cidade="todas" aria-pressed="true">Todas as cidades</button>
+          <button class="filtro" type="button" data-cidade="minha" aria-pressed="false" hidden>Minha cidade</button>
+        </div>
+      </div>
+      <div class="ranking__corpo">
+        <p class="lista__contagem" id="ranking-contagem" aria-live="polite"></p>
+        <ol class="ranking__lista" id="ranking-lista" aria-busy="true" aria-label="Ranking">
+          <li class="lista__estado">Carregando o ranking…</li>
+        </ol>
+        <div class="ranking__minha" id="ranking-minha" hidden></div>
       </div>
     </section>
 

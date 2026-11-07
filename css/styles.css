@@ -179,7 +179,7 @@ a:hover { color: var(--verde-900); text-decoration-thickness: 2px; }
 @media (min-width: 900px) {
   .topo__menu { display: none; }
   .menu { position: static; display: block; background: none; border: 0; }
-  .menu ul { display: flex; gap: 1.5rem; padding: 0; }
+  .menu ul { display: flex; gap: clamp(0.6rem, 1.6vw, 1.5rem); padding: 0; }
   .menu a {
     display: flex;
     align-items: center;
@@ -836,6 +836,53 @@ body:has(dialog[open]) { overflow: hidden; }
 .resumo__dados div { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 0.9rem 0; border-bottom: 1px solid var(--linha); }
 .resumo__dados dt { color: var(--tinta-2); }
 .resumo__dados dd { margin: 0; font-family: var(--fonte-titulo); font-size: 1.2rem; font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------- Ranking ---------- */
+.ranking { display: grid; gap: 2rem; }
+.ranking[hidden] { display: none; }
+.ranking__intro { margin: 1rem 0 1.75rem; max-width: 38ch; color: var(--tinta-2); }
+.ranking__lado .filtros { margin-bottom: 0.75rem; }
+.ranking__lista { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--linha); }
+
+.rank {
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.1rem 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--linha);
+}
+.rank__pos {
+  grid-row: 1 / span 2;
+  font-family: var(--fonte-titulo);
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--tinta-2);
+  font-variant-numeric: tabular-nums;
+}
+.rank__nome { grid-column: 2; font-family: var(--fonte-titulo); font-size: 1.25rem; font-weight: 500; line-height: 1.2; overflow-wrap: anywhere; }
+.rank__cidade { grid-column: 2; color: var(--tinta-2); font-size: 0.92rem; }
+.rank__pontos { grid-column: 3; grid-row: 1 / span 2; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rank__voce { margin-left: 0.25rem; font: 600 0.72rem var(--fonte-texto); letter-spacing: 0.12em; text-transform: uppercase; color: var(--verde-700); }
+
+/* 1º, 2º e 3º em destaque só por tipografia e cor */
+.rank--1 .rank__pos { font-size: 2.75rem; color: var(--verde-800); }
+.rank--1 .rank__nome { font-size: 1.75rem; font-weight: 650; color: var(--verde-900); }
+.rank--1 .rank__pontos { color: var(--verde-900); font-size: 1.15rem; }
+.rank--2 .rank__pos, .rank--3 .rank__pos { font-size: 2rem; color: var(--verde-700); }
+.rank--2 .rank__nome, .rank--3 .rank__nome { font-size: 1.45rem; font-weight: 600; }
+.rank--voce .rank__nome { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.2em; text-decoration-color: var(--verde-700); }
+
+.ranking__minha { margin-top: 1.75rem; }
+.rank__rotulo { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--tinta-2); }
+.rank__minha-linha { margin-top: 0.2rem; font-family: var(--fonte-titulo); font-size: clamp(1.5rem, 4.5vw, 1.9rem); font-weight: 500; color: var(--verde-800); }
+.rank__aviso { color: var(--tinta-2); }
+
+@media (min-width: 900px) {
+  .ranking { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 4rem; align-items: start; }
+  .ranking__lado { position: sticky; top: calc(var(--altura-topo) + 2rem); }
+}
 
 /* ---------- Movimento reduzido ---------- */
 @media (prefers-reduced-motion: reduce) {
