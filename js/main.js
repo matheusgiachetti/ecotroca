@@ -15,6 +15,7 @@ import {
   urlComoChegar,
 } from './geo.js';
 import { iniciarMapa } from './map.js';
+import { iniciarConta } from './conta.js';
 
 document.documentElement.classList.add('js');
 
@@ -40,6 +41,9 @@ const estado = {
   selecionadoId: null,
   mapa: null,          // controlador devolvido por iniciarMapa()
 };
+
+// Painéis de conta e de registrar descarte (js/conta.js). Sem login nada muda no mapa e na lista.
+let conta = { disponivel: false, registrarDescarteDe() {} };
 
 // ---------- Elementos ----------
 const $ = (seletor) => document.querySelector(seletor);
@@ -125,13 +129,23 @@ function criarDetalhes(ponto, idDetalhes) {
   info.append(criar('span', 'status__fonte', `Fonte: ${ponto.fonte || 'não informada'}`));
   linha('Informação', info);
 
-  const rota = criar('a', 'botao', 'Como chegar');
+  const acoes = criar('div', 'ponto__acoes');
+  if (conta.disponivel) {
+    const registrar = criar('button', 'botao', 'Registrar descarte');
+    registrar.type = 'button';
+    registrar.setAttribute('aria-label', `Registrar descarte em ${ponto.nome}`);
+    registrar.addEventListener('click', () => conta.registrarDescarteDe(ponto, registrar));
+    acoes.append(registrar);
+  }
+
+  const rota = criar('a', 'botao botao--suave', 'Como chegar');
   rota.href = urlComoChegar(ponto.lat, ponto.lng);
   rota.target = '_blank';
   rota.rel = 'noopener';
   rota.setAttribute('aria-label', `Como chegar a ${ponto.nome} (abre o Google Maps em nova aba)`);
+  acoes.append(rota);
 
-  detalhes.append(dados, rota);
+  detalhes.append(dados, acoes);
   return detalhes;
 }
 
@@ -457,6 +471,7 @@ function iniciarAnimacoes() {
 
 function iniciar() {
   iniciarMenu();
+  conta = iniciarConta();
   iniciarFeedback();
   iniciarAnimacoes();
 
