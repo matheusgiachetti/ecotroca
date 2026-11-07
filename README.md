@@ -24,6 +24,8 @@ js/geo.js               geolocalização, distância (Haversine) e link "Como ch
 data/pontos-exemplo.json   pontos fictícios do modo demonstração
 supabase/schema.sql     tabela pontos_coleta + RLS
 supabase/seed.sql       5 pontos de EXEMPLO (fictícios)
+supabase/02-perfis.sql, 03-tipos-residuo.sql, 04-descartes.sql, 05-rpc-pontos.sql
+                        conta, pontos e descartes (rodar nesta ordem, depois do schema.sql)
 supabase/pontos-reais.sql  4 pontos reais de Sorocaba (em verificação)
 assets/                 logo, ícones e fotos otimizadas
 vercel.json             cabeçalhos para a hospedagem estática
@@ -197,9 +199,33 @@ Marque `verificado = true` só depois de confirmar com a fonte; o site mostra "V
 - **Domínio:** `ecotroca.vercel.app` já pertence a outra conta; o projeto ficou com `ecotroca-xi.vercel.app`. As tags `og:url`, `og:image` e `canonical` usam esse domínio — troque se configurar um domínio próprio.
 - O arquivo `UPX_S2.html` (estrutura inicial do grupo) foi mantido sem alterações.
 
+## Conta e pontos (base pronta; sem interface ainda)
+
+O banco e o `js/data.js` já têm: cadastro e login por e-mail e senha (com apelido único de 3 a 20 caracteres: letras, números e `_`), registro de descartes por proximidade, pontos e níveis. A tela de conta e de pontos é a próxima etapa; hoje quem não entra na conta usa o site exatamente como antes.
+
+**Como funciona o descarte:** a função `registrar_descarte` (SQL, `supabase/05-rpc-pontos.sql`) exige login, confere que a pessoa está a até **200 m** do ponto (a posição não é guardada), aceita **5 registros e 30 itens por dia** (dia de Brasília) e calcula pontos e peso no banco. Níveis: Semente 0–49, Broto 50–149, Muda 150–349, Árvore 350–699, Floresta 700+.
+
+| Tipo de resíduo | Pontos por item | Peso estimado por item |
+|---|---|---|
+| Pilhas e baterias | 5 | 0,025 kg |
+| Cabos e carregadores | 5 | 0,150 kg |
+| Celulares | 20 | 0,170 kg |
+| Computadores e periféricos | 50 | 2,000 kg |
+| Eletrodomésticos pequenos | 30 | 1,200 kg |
+
+> **Os pesos em kg são "estimativa do grupo - revisar"**: ainda não têm fonte verificada (a coluna `fonte` de `tipos_residuo` diz isso). Revise antes de divulgar qualquer número de impacto. Para corrigir, edite a tabela `tipos_residuo` no painel do Supabase (não precisa mexer no código).
+
+> **Limitação:** sem foto ou QR code no ponto, o descarte é confirmado só pela proximidade (a posição vem do navegador e pode ser falseada) e pelos limites diários. Serve para desestimular abuso, não para provar o descarte. Antes de haver recompensa real ou ranking público, é preciso uma confirmação mais forte.
+
+**Confirmação de e-mail do Auth: desligada** por enquanto, porque o envio padrão do Supabase tem limite muito baixo de e-mails por hora. Para religar: Dashboard → **Authentication → Sign In / Providers → Email → Confirm email**. Com ela ligada, o cadastro só vale depois de a pessoa abrir o e-mail (e convém configurar um SMTP próprio). Aviso do Supabase ainda aberto: *Leaked password protection* (checagem de senhas vazadas) está desligada; ela fica em **Authentication → Sign In / Providers → Password** e, segundo o Supabase, depende de plano pago.
+
+**Apagar pontos:** não rode `pontos-reais.sql` (ele apaga e reinsere pontos) depois que houver descartes: o histórico fica com `ponto_id` vazio. Para corrigir um ponto, use `update`.
+
+**Usuários de teste:** a suíte cria contas `teste-ecotroca-*@example.com` pela API de Auth. A chave pública não consegue apagá-las; depois de rodar `tests/test_11` e `test_12`, remova-as no SQL Editor: `delete from auth.users where email like 'teste-ecotroca-%@example.com';` (perfis e descartes saem junto).
+
 ## Próximos passos (fora do escopo atual)
 
-Login, cadastro, pontuação/recompensas, ranking, métricas de impacto e painel administrativo. O código já está separado para isso: `data.js` concentra o acesso ao banco (novas tabelas e Supabase Auth entram aqui), `map.js` isola o mapa e `main.js` cuida só da interface.
+Interface de conta e de pontos, ranking, recompensas, métricas de impacto e painel administrativo. O código já está separado para isso: `data.js` concentra o acesso ao banco (novas tabelas e Supabase Auth entram aqui), `map.js` isola o mapa e `main.js` cuida só da interface.
 
 ## Créditos
 

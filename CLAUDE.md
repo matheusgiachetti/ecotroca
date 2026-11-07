@@ -14,7 +14,9 @@ Guia de referência para quem (pessoa ou agente) for mexer neste repositório. L
 - **Fluxo principal:** "Encontrar ponto de coleta" → permitir localização → lista ordenada por distância, primeiro item com selo "Mais próximo" → detalhes (horário, resíduos aceitos, telefone, status, fonte) → "Como chegar" (abre rota no Google Maps).
 - **Confiabilidade dos dados é parte do produto:** cada ponto mostra "Verificado" ou "Em verificação" e a fonte. Não se cadastra ponto sem coordenada confiável ("para não levar ninguém ao lugar errado"). `verificado = true` só depois de confirmar com a fonte (telefone 156 da Prefeitura ou visita).
 - **Feedback:** link "Dê sua opinião" para um Google Forms (abaixo da lista e no rodapé).
-- **Fora do escopo atual (próximos passos):** login, cadastro, pontuação/recompensas, ranking, métricas de impacto, painel administrativo.
+- **Conta e pontos (base pronta no banco e no `data.js`; a interface visual de conta é a próxima etapa):** cadastro/login por e-mail e senha com apelido único, descartes registrados por proximidade, pontos, níveis (Semente 0–49, Broto 50–149, Muda 150–349, Árvore 350–699, Floresta 700+). Quem não entra na conta usa o mapa e a lista normalmente: **o fluxo sem login nunca pode depender de conta**.
+- **Limitação conhecida da confirmação do descarte:** sem foto ou QR code, o descarte é aceito só por **proximidade** (até 200 m do ponto, pela posição que o navegador informa, que dá para falsear) e pelos **limites diários** (5 registros e 30 itens por dia). É dissuasão, não prova. Qualquer recompensa real ou ranking público precisa de uma confirmação mais forte (QR no ponto, foto ou validação do responsável) antes de valer algo.
+- **Fora do escopo atual:** interface visual de conta e de pontos, ranking, recompensas, métricas de impacto, painel administrativo.
 
 Seções da página (`index.html`): Início (hero) · Mapa · Como funciona · O que descartar · Dúvidas · Sobre · Rodapé.
 
@@ -24,7 +26,7 @@ Seções da página (`index.html`): Início (hero) · Mapa · Como funciona · O
 
 - **HTML + CSS + JavaScript puro** (ES modules nativos). **Sem build, sem framework, sem `package.json`, sem bundler.** Não introduza nenhum deles sem pedido explícito.
 - **Google Maps JavaScript API**, carregada via bootstrap de `importLibrary` (reescrito em `js/map.js`) com `AdvancedMarkerElement` (exige Map ID; hoje `DEMO_MAP_ID`).
-- **Supabase** (Postgres + RLS) via `@supabase/supabase-js@2.115.0` importado de `cdn.jsdelivr.net` sob demanda, com `persistSession: false`.
+- **Supabase** (Postgres + RLS) via `@supabase/supabase-js@2.115.0` importado de `cdn.jsdelivr.net` sob demanda, com `persistSession: true` (sessão no `localStorage`, renovada sozinha). A confirmação de e-mail do Auth está **desligada** por enquanto (o envio padrão do Supabase é muito limitado); para religar: Dashboard → Authentication → Sign In / Providers → Email → ligar *Confirm email*. Com ela ligada, `cadastrar()` devolve `precisaConfirmar: true` e o site precisa avisar a pessoa para abrir o e-mail.
 - **Vercel**, hospedagem estática (Framework Preset: Other, sem build command, raiz como saída).
 - **Fontes (Google Fonts):** Bricolage Grotesque (títulos), Instrument Sans (texto). Times New Roman (fonte do sistema) só no título do hero.
 - **Idioma:** pt-BR em tudo: interface, nomes de variáveis/funções/classes CSS, comentários e mensagens de commit.
@@ -44,6 +46,10 @@ js/geo.js                  geolocalização, Haversine, formatação de distânc
 data/pontos-exemplo.json   pontos fictícios do modo demonstração
 supabase/schema.sql        tabela pontos_coleta + constraints + RLS (idempotente)
 supabase/seed.sql          5 pontos FICTÍCIOS ("Ponto de exemplo N …")
+supabase/02-perfis.sql     profiles (apelido único) + trigger em auth.users + RLS
+supabase/03-tipos-residuo.sql  tipos_residuo: pontos e kg estimado por item (mesmos nomes dos filtros)
+supabase/04-descartes.sql  descartes (só leitura do próprio usuário)
+supabase/05-rpc-pontos.sql registrar_descarte (SECURITY DEFINER), meu_resumo, nivel_por_pontos
 supabase/pontos-reais.sql  4 pontos reais de Sorocaba, verificado = false
 assets/                    logo, favicons, fotos em .webp + .jpg em vários tamanhos, og.jpg
 vercel.json                cleanUrls + cabeçalhos de segurança + cache de /assets
@@ -77,6 +83,7 @@ BASE_URL=https://ecotroca-xi.vercel.app python -m pytest tests   # contra produ�
 ```
 
 - A suíte (`tests/test_01…test_10`) segue os itens da auditoria: mapa, localização, cartão, filtros, seções/feedback, layout, head/404, segurança, desempenho/acessibilidade. Ela lê os pontos reais do Supabase e falha se o projeto estiver pausado.
+- `test_11_pontos_banco.py` e `test_12_data_js.py` cobrem conta e pontos (RLS, isolamento entre usuários, 200 m, quantidade, 5 registros e 30 itens por dia, apelido inválido). Eles **criam usuários reais** `teste-ecotroca-*@example.com` pela API de Auth (precisa da confirmação de e-mail desligada). A chave pública não apaga usuário: depois de rodar, apague com `delete from auth.users where email like 'teste-ecotroca-%@example.com';` (SQL Editor ou MCP). Nunca deixe usuário de teste no banco de produção.
 - **Cota do Google Maps:** o projeto do Google Cloud não tem faturamento, então a chave é uma *demo key* com cota diária pequena, compartilhada com o site em produção. Teste novo só usa `abrir(..., mapa=True)` se precisar mesmo do mapa real; não rode a suíte em loop nem crie scripts que recarregam a página com o mapa. `SEM_MAPA=1` pula os testes de mapa.
 - Rode a suíte inteira antes de qualquer push na `main`. Funcionalidade nova ganha teste novo no arquivo do item correspondente.
 - Dados controlados (telefone, HTML malicioso, filtro sem resultado) são simulados com `responder_supabase()` em `tests/conftest.py`, sem tocar no banco.
@@ -159,7 +166,7 @@ Antes de criar qualquer componente, reutilize os tokens de `:root` em `css/style
 ## 7. Regras de segurança (obrigatórias)
 
 1. **Nunca usar a chave `service_role` do Supabase no front-end** (nem em `js/config.js`, nem em nenhum arquivo versionado, nem em variável da Vercel exposta ao navegador). O site usa só a chave **publishable/anon**, que é pública por design. Escritas administrativas acontecem pelo painel do Supabase. Se um dia precisar de operação privilegiada, ela vai para uma Edge Function ou backend, nunca para o navegador.
-2. **Toda tabela com RLS ativo.** Ao criar tabela nova: `enable row level security`, `revoke all … from anon, authenticated`, `grant` só o necessário e políticas explícitas e mínimas (padrão atual: `pontos_coleta` tem apenas `SELECT` para `anon`/`authenticated` e nenhuma política de escrita). Scripts SQL ficam em `supabase/`, idempotentes (`if not exists`, `drop policy if exists`), com constraints de validação. Depois de qualquer mudança de schema, rodar os advisors de segurança do Supabase.
+2. **Toda tabela com RLS ativo.** Tabelas atuais: `pontos_coleta` e `tipos_residuo` (leitura pública), `profiles` (o usuário lê só a própria linha e altera só `apelido` e `cidade`, por *grant* de coluna) e `descartes` (o usuário lê só os próprios; **sem** INSERT/UPDATE/DELETE para ninguém além da função). `pontos_total` e `descartes` só mudam por `registrar_descarte()`; pontos e peso são calculados no banco a partir de `tipos_residuo`, **nunca** de valores do cliente. A função é `SECURITY DEFINER` com `search_path` fixo, exige login, confere a distância (Haversine, 200 m, coordenadas do ponto lidas no banco) e **não grava a posição do usuário**. Funções novas: `revoke all … from public, anon, authenticated` e `grant execute` só a quem precisa. Ao criar tabela nova: `enable row level security`, `revoke all … from anon, authenticated`, `grant` só o necessário e políticas explícitas e mínimas (padrão atual: `pontos_coleta` tem apenas `SELECT` para `anon`/`authenticated` e nenhuma política de escrita). Scripts SQL ficam em `supabase/`, idempotentes (`if not exists`, `drop policy if exists`), com constraints de validação. Depois de qualquer mudança de schema, rodar os advisors de segurança do Supabase.
 3. **Textos vindos do banco sempre escapados.** Inserir no DOM só via `textContent` / `createElement` (o helper `criar()` existe em `main.js` e `map.js`). **Nunca** `innerHTML`, `insertAdjacentHTML`, `outerHTML` ou template string com dado do banco. Isso vale também para o conteúdo do `InfoWindow` do Maps (passar nós DOM, não string HTML).
    - URLs montadas com dados: coordenadas passam por `Number()` (`urlComoChegar`), telefone é filtrado para `[\d+]` antes de ir para `tel:`. Qualquer link novo vindo do banco deve validar o esquema (`https:` apenas), como `iniciarFeedback()` faz.
    - Links externos com `target="_blank"` levam `rel="noopener"`.
