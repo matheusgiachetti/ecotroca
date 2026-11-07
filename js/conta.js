@@ -15,6 +15,7 @@ import {
   registrarDescarte,
   meuResumo,
   minhasMedalhas,
+  excluirMinhaConta,
   modoDemonstracao,
 } from './data.js';
 import { obterPosicao } from './geo.js';
@@ -195,6 +196,7 @@ export function iniciarConta() {
 
   function abrirConta(vista, opener, fallback, aviso) {
     mostrarVista(vista, aviso);
+    if (vista === 'conta') recolherExclusao();
     abrirDialog(dlgConta, opener, fallback);
     if (vista === 'conta') carregarResumo();
   }
@@ -241,6 +243,10 @@ export function iniciarConta() {
   formCriar.addEventListener('submit', (e) => {
     e.preventDefault();
     enviarForm(formCriar, 'Criando a conta…', async (campos) => {
+      // Sem o aceite dos Termos e da Política de Privacidade, nada é enviado ao Supabase.
+      if (!campos.aceite.checked) {
+        throw new Error('Para criar a conta, marque que você leu e aceita os Termos de uso e a Política de Privacidade.');
+      }
       const email = campos.email.value.trim();
       const resultado = await cadastrar(email, campos.senha.value, campos.apelido.value);
       if (resultado.precisaConfirmar) {
@@ -267,6 +273,61 @@ export function iniciarConta() {
     if (dlgConta.open) dlgConta.close(); // o foco volta sozinho para quem abriu o painel
     else if (veioDoMenu) (visivel(botaoConta) ? botaoConta : botaoMenu).focus(); // o botão "Sair" sumiu
   }
+  // ---------- Excluir a conta ----------
+  const excluirAbrir = $('#excluir-abrir');
+  const excluirPainel = $('#excluir-painel');
+  const formExcluir = $('#form-excluir');
+  const excluirErro = $('#excluir-erro');
+
+  function recolherExclusao() {
+    excluirPainel.hidden = true;
+    excluirAbrir.hidden = false;
+    excluirAbrir.setAttribute('aria-expanded', 'false');
+    formExcluir.reset();
+    excluirErro.textContent = '';
+  }
+
+  excluirAbrir.addEventListener('click', () => {
+    $('#excluir-apelido-alvo').textContent = apelidoDe(sessao);
+    excluirPainel.hidden = false;
+    excluirAbrir.hidden = true;
+    excluirAbrir.setAttribute('aria-expanded', 'true');
+    $('#excluir-apelido').focus();
+  });
+  $('#excluir-cancelar').addEventListener('click', () => {
+    recolherExclusao();
+    excluirAbrir.focus();
+  });
+
+  formExcluir.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const botao = $('#excluir-confirmar');
+    if (ocupado(botao)) return;
+    excluirErro.textContent = '';
+    if (formExcluir.elements.apelido.value.trim() !== apelidoDe(sessao)) {
+      excluirErro.textContent = 'O apelido digitado não confere. Digite exatamente o seu apelido para excluir a conta.';
+      formExcluir.elements.apelido.focus();
+      return;
+    }
+    ocupar(botao, 'Excluindo…');
+    try {
+      await excluirMinhaConta();
+      sessao = null;
+      pendente = null;
+      atualizarMenu();
+      document.dispatchEvent(new CustomEvent('ecotroca:pontos')); // o ranking deixa de listar a pessoa
+      recolherExclusao();
+      const aviso = 'Sua conta foi excluída. Seus dados (e-mail, apelido, pontos, descartes e medalhas) foram apagados e você saiu da conta.';
+      mostrarVista('entrar', aviso);
+      anunciar(aviso);
+    } catch (erro) {
+      if (erro.codigo === 'nao_logado') sessaoExpirou();
+      else excluirErro.textContent = erro.message;
+    } finally {
+      liberar(botao);
+    }
+  });
+
   botaoSair.addEventListener('click', fazerSair);
   $('[data-conta-sair-painel]').addEventListener('click', fazerSair);
 

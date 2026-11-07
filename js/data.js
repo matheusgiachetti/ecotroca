@@ -267,6 +267,18 @@ export async function meuResumo() {
   };
 }
 
+/**
+ * Exclui a conta de quem está logado (supabase/08-excluir-conta.sql): o banco apaga o usuário e, em cascata,
+ * perfil, descartes e medalhas. Depois encerra a sessão neste navegador.
+ */
+export async function excluirMinhaConta() {
+  const cliente = await clienteDeConta();
+  const { error } = await cliente.rpc('excluir_minha_conta');
+  if (error) throw traduzirErro(error, 'Não foi possível excluir a conta agora. Tente de novo.');
+  // A sessão já não vale mais no servidor; limpa só o que ficou guardado neste navegador.
+  await cliente.auth.signOut({ scope: 'local' }).catch(() => {});
+}
+
 /** Medalhas da pessoa logada: [{ codigo, nome, descricao, conquistada, conquistadaEm }]. */
 export async function minhasMedalhas() {
   const cliente = await clienteDeConta();

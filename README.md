@@ -23,12 +23,13 @@ js/data.js              pontos de coleta no Supabase (ou JSON de exemplo no modo
 js/conta.js             painéis de conta e de registrar descarte (<dialog>)
 js/ranking.js           seção Ranking (top 10 por período e cidade)
 js/regras.js            seção "Como os pontos funcionam" (lê regras_pontos() do banco)
+privacidade.html, termos.html  Política de Privacidade e Termos de uso (versão para revisão)
 js/geo.js               geolocalização, distância (Haversine) e link "Como chegar"
 data/pontos-exemplo.json   pontos fictícios do modo demonstração
 supabase/schema.sql     tabela pontos_coleta + RLS
 supabase/seed.sql       5 pontos de EXEMPLO (fictícios)
-supabase/02-perfis.sql, 03-tipos-residuo.sql, 04-descartes.sql, 05-rpc-pontos.sql, 06-ranking.sql, 07-medalhas.sql
-                        conta, pontos, descartes, ranking e medalhas (rodar nesta ordem, 02 a 07, depois do schema.sql)
+supabase/02-perfis.sql, 03-tipos-residuo.sql, 04-descartes.sql, 05-rpc-pontos.sql, 06-ranking.sql, 07-medalhas.sql, 08-excluir-conta.sql
+                        conta, pontos, descartes, ranking, medalhas e exclusão de conta (rodar nesta ordem, 02 a 08, depois do schema.sql)
 supabase/pontos-reais.sql  4 pontos reais de Sorocaba (em verificação)
 assets/                 logo, ícones e fotos otimizadas
 vercel.json             cabeçalhos para a hospedagem estática
@@ -230,7 +231,7 @@ O banco, o `js/data.js` e a interface (`js/conta.js`, painéis na própria pági
 
 **Apagar pontos:** não rode `pontos-reais.sql` (ele apaga e reinsere pontos) depois que houver descartes: o histórico fica com `ponto_id` vazio. Para corrigir um ponto, use `update`.
 
-**Usuários de teste:** a suíte cria contas `teste-ecotroca-*@example.com` pela API de Auth. A chave pública não consegue apagá-las; depois de rodar `tests/test_11`, `test_12`, `test_13`, `test_14` e `test_16`, remova-as no SQL Editor: `delete from auth.users where email like 'teste-ecotroca-%@example.com';` (perfis e descartes saem junto).
+**Usuários de teste:** a suíte cria contas `teste-ecotroca-*@example.com` pela API de Auth. A chave pública não consegue apagá-las; depois de rodar `tests/test_11`, `test_12`, `test_13`, `test_14`, `test_16` e `test_18`, remova-as no SQL Editor: `delete from auth.users where email like 'teste-ecotroca-%@example.com';` (perfis e descartes saem junto).
 
 ## Ranking
 
@@ -249,6 +250,15 @@ Seção **Ranking** na página: top 10 por **Semana** (segunda a domingo), **Mê
 **Seção "Como os pontos funcionam"** (link **Pontos** no menu): pontos por tipo, níveis, medalhas e limites diários, tudo lido de `regras_pontos()`.
 
 > **Ordem de aplicação:** no SQL Editor, rode `05-rpc-pontos.sql` e depois `07-medalhas.sql` (os dois são idempotentes e podem ir na mesma execução). Só depois faça o push. O `05` sozinho continua registrando descartes (só não há medalhas até o `07`); sem o `07` a seção Pontos e a lista de medalhas mostram erro com "Tentar de novo".
+
+## Privacidade, termos e exclusão de conta
+
+- **Páginas:** `privacidade.html` e `termos.html`, linkadas no rodapé. Estão marcadas **"Versão para revisão"**: o texto foi escrito a partir do que o código faz e **ainda precisa de revisão jurídica** antes de ser tratado como final. Controlador: *Grupo Ecotroca, UPx Facens*; contato (e-mail e o link do formulário de opinião, `FEEDBACK_FORM_URL`) no texto das duas páginas; como são HTML estático, o link do formulário está escrito nelas e precisa ser atualizado junto se `js/config.js` mudar. Se mudar o que o site guarda, atualize as páginas.
+- **O que o site guarda de cada pessoa:** e-mail e senha (Supabase Auth), apelido, cidade (padrão "Sorocaba"), pontos, descartes (ponto, tipo, quantidade, pontos, peso estimado, data e hora) e medalhas com a data. **A localização não é guardada**: vai ao banco só como argumento de `registrar_descarte`, para conferir a distância.
+- **Aceite no cadastro:** a caixa "Li e aceito os Termos de uso e a Política de Privacidade" é obrigatória. A checagem é feita no navegador (o banco não registra o aceite).
+- **Excluir minha conta:** em Minha conta, exige digitar o apelido. Chama `excluir_minha_conta()` (`supabase/08-excluir-conta.sql`, `SECURITY DEFINER`, só logado, sem parâmetros: só apaga a própria conta). A linha de `auth.users` é apagada e `profiles`, `descartes` e `usuario_medalhas` saem em **cascata**; a exclusão não deixa dado órfão. Depois a pessoa sai da sessão e vê a mensagem de conta excluída.
+
+> **Ordem de aplicação:** rode `supabase/08-excluir-conta.sql` no SQL Editor ANTES de publicar. Sem ele, o botão "Excluir minha conta" mostra "Não foi possível excluir a conta agora".
 
 ## Próximos passos (fora do escopo atual)
 

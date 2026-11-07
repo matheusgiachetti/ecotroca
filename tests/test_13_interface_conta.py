@@ -108,10 +108,15 @@ def test_cadastro_sair_e_entrar_pela_interface(abrir, largura, altura):
     assert axe_do_painel(page) == []
     assert page.evaluate(ALVOS_PEQUENOS) == []
 
-    # Apelido inválido: erro do próprio formulário, sem fechar
+    # Sem o aceite dos Termos, o cadastro não é enviado (test_17 confere que nenhuma requisição sai)
     page.fill("#criar-email", email)
     page.fill("#criar-senha", SENHA)
     page.fill("#criar-apelido", "ab")
+    page.click("#form-criar button[type=submit]")
+    assert "aceita os Termos de uso" in page.locator("#form-criar .form__erro").inner_text()
+    page.check("#criar-aceite")
+
+    # Apelido inválido: erro do próprio formulário, sem fechar
     page.click("#form-criar button[type=submit]")
     assert "3 a 20 caracteres" in page.locator("#form-criar .form__erro").inner_text()
     assert page.locator("#painel-conta").is_visible()

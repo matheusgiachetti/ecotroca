@@ -630,6 +630,8 @@ a:hover { color: var(--verde-900); text-decoration-thickness: 2px; }
 .rodape__marca img { height: 40px; width: auto; }
 .rodape__slogan { flex: 1; }
 .rodape__opiniao a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
+.rodape__legal { display: flex; flex-wrap: wrap; gap: 0 1.25rem; }
+.rodape__legal a { display: inline-flex; align-items: center; min-height: 44px; }
 .rodape a { color: var(--tinta); }
 .rodape a:hover { color: var(--verde-700); }
 
@@ -773,6 +775,34 @@ body:has(dialog[open]) { overflow: hidden; }
   font: inherit;
 }
 .campo--curto input { max-width: 8rem; }
+/* Caixa de aceite: o input cobre a linha inteira (alvo ≥ 44 px); a marca visual é desenhada à parte */
+.campo label.aceite { position: relative; display: flex; align-items: flex-start; gap: 0.75rem; min-height: 44px; padding: 0.4rem 0; font-weight: 400; }
+.campo .aceite input { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; margin: 0; padding: 0; border: 0; background: none; opacity: 0; cursor: pointer; }
+.aceite__marca { flex: none; width: 24px; height: 24px; margin-top: 0.1rem; border: 2px solid var(--tinta-2); background: #fff; }
+.aceite input:checked + .aceite__marca {
+  border-color: var(--verde-700);
+  background: var(--verde-700) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 100% no-repeat;
+}
+.campo label.aceite:has(input:focus-visible) { outline: 3px solid var(--verde-700); outline-offset: 2px; }
+.aceite a { position: relative; z-index: 1; }
+.botao--perigo { background: var(--alerta); }
+.botao--perigo:hover { background: #6B3906; }
+.excluir { margin-top: 2.5rem; padding-top: 1.25rem; border-top: 1px solid var(--linha); }
+.excluir__aviso { margin: 0.5rem 0 1.25rem; color: var(--tinta-2); }
+
+/* ---------- Páginas de Privacidade e Termos ---------- */
+.topo__voltar { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
+.documento { max-width: 46rem; margin: 0 auto 0 0; }
+.documento > * + * { margin-top: 1rem; }
+.documento__revisao { padding: 1rem 1.25rem; background: var(--verde-100); color: var(--tinta); }
+.documento__titulo { margin-top: 0; font-family: var(--fonte-titulo); font-size: clamp(2.2rem, 6vw, 3.4rem); letter-spacing: -0.02em; }
+.documento__data { color: var(--tinta-2); }
+.documento h2 { margin-top: 2.5rem; max-width: none; font-size: clamp(1.35rem, 3vw, 1.7rem); letter-spacing: -0.01em; }
+.documento h2 + * { margin-top: 0.6rem; }
+.documento ul { margin: 0.75rem 0 0; padding-left: 1.25rem; }
+.documento li + li { margin-top: 0.5rem; }
+.documento li, .documento p { max-width: 62ch; }
+.documento .documento__revisao { max-width: none; }
 .campo__dica { margin-top: 0.35rem; color: var(--tinta-2); font-size: 0.9rem; }
 .form__erro { color: var(--alerta); font-weight: 500; overflow-wrap: anywhere; }
 .form__erro:not(:empty) { margin: 0 0 1.1rem; }

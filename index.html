@@ -297,6 +297,10 @@
     </div>
     <div class="rodape__linha rodape__linha--fina">
       <p>Projeto da UPx · Facens</p>
+      <p class="rodape__legal">
+        <a href="privacidade.html">Privacidade</a>
+        <a href="termos.html">Termos de uso</a>
+      </p>
       <p class="rodape__creditos">
         Fotos:
         <a href="https://unsplash.com/@cdr6934?utm_source=ecotroca&amp;utm_medium=referral">Chris Ried</a> e
@@ -347,6 +351,15 @@
           <input id="criar-senha" name="senha" type="password" autocomplete="new-password" minlength="6" required aria-describedby="criar-senha-dica">
           <p class="campo__dica" id="criar-senha-dica">Pelo menos 6 caracteres.</p>
         </div>
+        <div class="campo">
+          <label class="aceite" for="criar-aceite">
+            <input id="criar-aceite" name="aceite" type="checkbox">
+            <span class="aceite__marca" aria-hidden="true"></span>
+            <span>Li e aceito os
+              <a href="termos.html" target="_blank" rel="noopener" aria-label="Termos de uso (abre em nova aba)">Termos de uso</a> e a
+              <a href="privacidade.html" target="_blank" rel="noopener" aria-label="Política de Privacidade (abre em nova aba)">Política de Privacidade</a>.</span>
+          </label>
+        </div>
         <p class="form__erro" role="alert"></p>
         <button class="botao" type="submit">Criar conta</button>
         <p class="form__troca">Já tem conta? <button class="botao-texto" type="button" data-ir-vista="entrar">Entrar</button></p>
@@ -373,6 +386,25 @@
         <button class="botao botao--suave" type="button" id="medalhas-tentar" hidden>Tentar de novo</button>
 
         <button class="botao botao--suave" type="button" data-conta-sair-painel>Sair</button>
+
+        <div class="excluir">
+          <button class="botao-texto" type="button" id="excluir-abrir" aria-expanded="false" aria-controls="excluir-painel">Excluir minha conta</button>
+          <div id="excluir-painel" hidden>
+            <h3 class="resumo__subtitulo">Excluir minha conta</h3>
+            <p class="excluir__aviso">Isso apaga o seu e-mail, apelido, pontos, descartes e medalhas. Não dá para desfazer.</p>
+            <form class="form" id="form-excluir" novalidate>
+              <div class="campo">
+                <label for="excluir-apelido">Para confirmar, digite o seu apelido: <strong id="excluir-apelido-alvo"></strong></label>
+                <input id="excluir-apelido" name="apelido" type="text" autocomplete="off" spellcheck="false" autocapitalize="off">
+              </div>
+              <p class="form__erro" role="alert" id="excluir-erro"></p>
+              <div class="ponto__acoes">
+                <button class="botao botao--perigo" type="submit" id="excluir-confirmar">Excluir definitivamente</button>
+                <button class="botao botao--suave" type="button" id="excluir-cancelar">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
       </section>
     </div>
   </dialog>
