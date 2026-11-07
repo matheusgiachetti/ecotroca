@@ -100,6 +100,14 @@ def navegador(_pw):
     b.close()
 
 
+def _ranking_vazio(route):
+    cors = {"access-control-allow-origin": "*", "access-control-allow-headers": "*", "access-control-allow-methods": "POST, OPTIONS"}
+    if route.request.method == "OPTIONS":
+        route.fulfill(status=204, headers=cors)
+    else:
+        route.fulfill(status=200, headers={**cors, "content-type": "application/json"}, body="[]")
+
+
 SEM_MAPA = os.environ.get("SEM_MAPA") == "1"
 COTA_ESGOTADA = "Demo Key limit reached"
 # Erros esperados quando o script do Maps é bloqueado de propósito
@@ -137,7 +145,7 @@ def abrir(navegador):
     abertas = []
 
     def _abrir(caminho="/", *, largura=390, altura=844, geo=None, permitir_geo=False,
-               preparar=None, base=BASE_URL, movimento="no-preference", toque=False, mapa=False):
+               preparar=None, base=BASE_URL, movimento="no-preference", toque=False, mapa=False, ranking_real=False):
         if mapa and SEM_MAPA:
             pytest.skip("SEM_MAPA=1: teste que carrega o Google Maps de verdade")
         contexto = navegador.new_context(
@@ -153,6 +161,11 @@ def abrir(navegador):
         abertas.append(contexto)
         if not mapa:
             page.route("**/maps.googleapis.com/**", lambda r: r.abort())
+        if not ranking_real:
+            # O ranking não é o assunto da maioria dos testes: responde "ninguém pontuou" para que eles
+            # não dependam do estado do banco real. test_14 simula dados próprios ou usa ranking_real=True.
+            page.route("**/rest/v1/rpc/ranking", _ranking_vazio)
+            page.route("**/rest/v1/rpc/minha_posicao", _ranking_vazio)
         if preparar:
             preparar(page)
         page.goto(base + caminho, wait_until="domcontentloaded")
