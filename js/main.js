@@ -129,7 +129,7 @@ function criarDetalhes(ponto, idDetalhes) {
   rota.href = urlComoChegar(ponto.lat, ponto.lng);
   rota.target = '_blank';
   rota.rel = 'noopener';
-  rota.setAttribute('aria-label', `Como chegar a ${ponto.nome} (abre o Google Maps)`);
+  rota.setAttribute('aria-label', `Como chegar a ${ponto.nome} (abre o Google Maps em nova aba)`);
 
   detalhes.append(dados, rota);
   return detalhes;

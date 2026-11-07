@@ -111,6 +111,7 @@ export async function iniciarMapa(container, { aoClicarPonto, aoFalhar }) {
     link.href = urlComoChegar(ponto.lat, ponto.lng);
     link.target = '_blank';
     link.rel = 'noopener';
+    link.setAttribute('aria-label', `Como chegar a ${ponto.nome} (abre o Google Maps em nova aba)`);
     raiz.append(link);
     return raiz;
   }
