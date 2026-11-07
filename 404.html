@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Página não encontrada — Ecotroca</title>
+  <meta name="description" content="Esta página não existe. Volte ao início da Ecotroca para encontrar o ponto de coleta de lixo eletrônico mais próximo.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#FAF8F3">
+
+  <!-- Caminhos absolutos: a Vercel serve esta página em qualquer endereço inexistente, inclusive /a/b/c -->
+  <link rel="icon" href="/assets/favicon.ico" sizes="any">
+  <link rel="icon" href="/assets/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650;12..96,750&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="topo__barra">
+      <a class="topo__marca" href="/" aria-label="Ecotroca, ir para o início">
+        <img src="/assets/logo-320.png" alt="Ecotroca" width="160" height="82" decoding="async">
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="erro-titulo">
+      <picture class="hero__foto">
+        <source type="image/webp"
+                srcset="/assets/hero-768.webp 768w, /assets/hero-1280.webp 1280w, /assets/hero-2000.webp 2000w"
+                sizes="100vw">
+        <img src="/assets/hero-1280.jpg"
+             srcset="/assets/hero-768.jpg 768w, /assets/hero-1280.jpg 1280w, /assets/hero-2000.jpg 2000w"
+             sizes="100vw" width="2000" height="1335" fetchpriority="high" decoding="async"
+             alt="Close de uma placa de circuito verde com chips e pequenos componentes eletrônicos">
+      </picture>
+      <div class="hero__conteudo">
+        <p class="hero__sobretitulo">Erro 404</p>
+        <h1 class="hero__titulo" id="erro-titulo">Esta página não existe.</h1>
+        <p class="hero__apoio">O endereço pode ter mudado ou ter sido digitado com algum erro. O mapa com os pontos de coleta continua no mesmo lugar.</p>
+        <div class="hero__acoes">
+          <a class="botao botao--claro" href="/">Voltar ao início</a>
+          <a class="hero__link" href="/#mapa">Ver o mapa</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <div class="rodape__linha">
+      <a href="/" class="rodape__marca" aria-label="Ecotroca, ir para o início">
+        <img src="/assets/logo-320.png" alt="Ecotroca" width="110" height="56" loading="lazy">
+      </a>
+      <p class="rodape__slogan">O caminho para um futuro sustentável.</p>
+    </div>
+    <div class="rodape__linha rodape__linha--fina">
+      <p>Projeto da UPx · Facens</p>
+      <p class="rodape__creditos">
+        Foto:
+        <a href="https://unsplash.com/@cdr6934?utm_source=ecotroca&amp;utm_medium=referral">Chris Ried</a>
+        no <a href="https://unsplash.com/?utm_source=ecotroca&amp;utm_medium=referral">Unsplash</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

@@ -8,6 +8,8 @@ import pytest
 from PIL import Image
 
 from conftest import BASE_URL, LOCAL, RAIZ
+from test_07_layout import ALVOS_PEQUENOS
+from test_10_desempenho_a11y import AXE
 
 PRODUCAO = "https://ecotroca-xi.vercel.app"
 
@@ -57,21 +59,22 @@ def test_pagina_404(abrir):
     arquivo = RAIZ / "404.html"
     assert arquivo.exists(), "falta 404.html"
 
-    if LOCAL:
-        # Simula a Vercel: qualquer caminho inexistente (inclusive aninhado) recebe o 404.html.
-        # Isso prova que os caminhos de CSS e imagens são absolutos.
-        corpo = arquivo.read_text(encoding="utf-8")
-        preparar = lambda page: page.route(  # noqa: E731
-            "**/nao/existe/**", lambda r: r.fulfill(status=404, content_type="text/html; charset=utf-8", body=corpo)
-        )
-    else:
-        preparar = None
+    respostas_ruins = []
+
+    def preparar(page):
+        page.on("response", lambda r: respostas_ruins.append(f"{r.status} {r.url}")
+                if r.status >= 400 and "/nao/existe/" not in r.url and "/pagina-que" not in r.url else None)
+        if LOCAL:
+            # Simula a Vercel: qualquer caminho inexistente (inclusive aninhado) recebe o 404.html.
+            # Isso prova que os caminhos de CSS e imagens são absolutos.
+            corpo = arquivo.read_text(encoding="utf-8")
+            page.route("**/nao/existe/**",
+                       lambda r: r.fulfill(status=404, content_type="text/html; charset=utf-8", body=corpo))
+
     p = abrir("/nao/existe/pagina", largura=375, preparar=preparar)
     page = p.page
     page.wait_for_load_state("networkidle")
 
-    falhas = []
-    page.on("requestfailed", lambda r: falhas.append(r.url))
     assert page.locator("html").get_attribute("lang") == "pt-BR"
     assert "404" in page.title() or "não encontrada" in page.title().lower()
     assert page.locator("meta[name='robots']").get_attribute("content").startswith("noindex")
@@ -83,7 +86,16 @@ def test_pagina_404(abrir):
     assert "Times New Roman" in page.evaluate("getComputedStyle(document.querySelector('h1')).fontFamily")
     assert page.evaluate("document.querySelector('.hero__foto img').naturalWidth") > 0, "foto não carregou"
     assert page.evaluate("[document.documentElement.scrollWidth, innerWidth]") == [375, 375]
-    assert falhas == [] and p.erros == [], (falhas, p.erros)
+    assert page.evaluate(ALVOS_PEQUENOS) == []
+    page.add_script_tag(url=AXE)
+    violacoes = page.evaluate(
+        "async () => (await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }))"
+        ".violations.map(v => v.id)"
+    )
+    assert violacoes == [], violacoes
+    # O único "erro" aceito é o próprio status 404 do documento
+    erros = [e for e in p.erros if "status of 404" not in e]
+    assert respostas_ruins == [] and erros == [], (respostas_ruins, erros)
 
 
 @pytest.mark.skipif(LOCAL, reason="o status 404 real só existe na Vercel")
