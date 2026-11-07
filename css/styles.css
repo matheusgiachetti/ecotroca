@@ -179,9 +179,12 @@ a:hover { color: var(--verde-900); text-decoration-thickness: 2px; }
 @media (min-width: 900px) {
   .topo__menu { display: none; }
   .menu { position: static; display: block; background: none; border: 0; }
-  .menu ul { display: flex; gap: 2rem; padding: 0; }
+  .menu ul { display: flex; gap: 1.5rem; padding: 0; }
   .menu a {
-    padding: 0.4rem 0;
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.25rem;
     border: 0;
     font-family: var(--fonte-texto);
     font-size: 0.95rem;
@@ -255,7 +258,7 @@ a:hover { color: var(--verde-900); text-decoration-thickness: 2px; }
   gap: 1rem 1.75rem;
   margin-top: 2.25rem;
 }
-.hero__link { color: #fff; font-weight: 500; }
+.hero__link { display: inline-flex; align-items: center; min-height: 44px; color: #fff; font-weight: 500; }
 .hero__link:hover { color: #CFE8C9; }
 
 /* ---------- Seções ---------- */
@@ -306,7 +309,7 @@ a:hover { color: var(--verde-900); text-decoration-thickness: 2px; }
 .filtros::-webkit-scrollbar { display: none; }
 .filtro {
   flex: none;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0.45rem 0.95rem;
   border: 0;
   border-radius: 999px;
@@ -432,6 +435,7 @@ a:hover { color: var(--verde-900); text-decoration-thickness: 2px; }
 .ponto__dados { display: grid; gap: 0.85rem; margin: 0 0 1.25rem; }
 .ponto__dados dt { font-size: 0.76rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tinta-2); }
 .ponto__dados dd { margin: 0.15rem 0 0; }
+.ponto__dados dd > a[href^="tel:"] { display: inline-flex; align-items: center; min-height: 44px; }
 .ponto__residuos { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.35rem 0 0; padding: 0; list-style: none; }
 .ponto__residuos li { padding: 0.15rem 0.55rem; background: var(--papel); font-size: 0.9rem; }
 .ponto:not(.is-proximo) .ponto__residuos li { background: var(--papel-2); }
@@ -622,9 +626,10 @@ a:hover { color: var(--verde-900); text-decoration-thickness: 2px; }
 }
 .rodape__linha { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 2rem; }
 .rodape__linha--fina { margin-top: 1.5rem; justify-content: space-between; font-size: 0.85rem; }
+.rodape__marca { display: inline-flex; align-items: center; min-height: 44px; }
 .rodape__marca img { height: 40px; width: auto; }
 .rodape__slogan { flex: 1; }
-.rodape__opiniao a { font-weight: 600; }
+.rodape__opiniao a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
 .rodape a { color: var(--tinta); }
 .rodape a:hover { color: var(--verde-700); }
 
