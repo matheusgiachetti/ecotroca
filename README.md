@@ -43,7 +43,7 @@ Abra <http://localhost:5173>. A geolocalização só funciona em `localhost` ou 
 
 > Abrir o `index.html` direto pelo explorador de arquivos (`file://`) não funciona: os módulos JS precisam de um servidor.
 
-> Use a porta **5173**: é a única liberada na chave do Google Maps. Em outra porta o mapa mostra "Não foi possível exibir o mapa" (a lista continua funcionando).
+> Use a porta **5173**: é a única liberada na chave do Google Maps. Em outra porta o mapa mostra "O mapa está indisponível agora" (a lista continua funcionando).
 
 ## Testes
 
@@ -57,6 +57,8 @@ python -m pytest tests              # testa http://localhost:5173
 ```
 
 Para testar o site publicado: `BASE_URL=https://ecotroca-xi.vercel.app python -m pytest tests` (no PowerShell: `$env:BASE_URL="https://ecotroca-xi.vercel.app"; python -m pytest tests`).
+
+Para poupar a cota do Google Maps (veja "Chave do Google Maps"), só ~7 testes carregam o mapa de verdade; nos outros o script do Maps é bloqueado. Com `SEM_MAPA=1` esses também são pulados.
 
 Os testes leem os pontos direto do Supabase e conferem: mapa e marcadores, aviso de chave recusada, localização (emulada), detalhes do ponto, filtros, seções, feedback, layout em 320/375/768/1280 px, alvos de toque, `<head>`, página 404, permissões do banco (a chave pública só lê), segredos no histórico do git, `innerHTML`, imagens, teclado, contraste e WCAG AA (axe-core). Precisam de internet.
 
@@ -95,7 +97,7 @@ Segurança: RLS ativo, política de `SELECT` para `anon`/`authenticated` e nenhu
 - restrição de API: só Maps JavaScript API;
 - restrição de sites: `https://ecotroca-xi.vercel.app/*`, `https://*.vercel.app/*`, `http://localhost:5173/*`, `http://127.0.0.1:5173/*`.
 
-Em 23/10/2026 o projeto ainda **não tinha conta de faturamento vinculada** (a conta Google do projeto não administra nenhuma), e mesmo assim o mapa carregou normalmente. O Google pode passar a exigir faturamento: se o mapa ficar escuro com a marca "For development purposes only", vá em **Faturamento → Vincular conta de faturamento** no projeto `ecotroca-512512`.
+**Faturamento (pendente):** o projeto **não tem conta de faturamento vinculada**. Sem ela, o Google trata a chave como *demo key*, com uma **cota diária pequena** para o mapa inteiro (produção, testes e desenvolvimento somados). Em 07/11/2026 essa cota acabou durante uma rodada de testes e o mapa ficou indisponível até a virada do dia (meia-noite no horário do Pacífico, 5h em Brasília); no console aparece `Maps Demo Key limit reached`. O site continua funcionando sem o mapa (lista, distâncias e "Como chegar"). Para resolver de vez: **Faturamento → Vincular conta de faturamento** no projeto `ecotroca-512512`. A cota gratuita mensal do Google Maps Platform cobre com folga um projeto acadêmico; crie um alerta de orçamento para garantir.
 
 Para refazer em outra conta:
 
@@ -117,7 +119,7 @@ Para refazer em outra conta:
 7. Cole a chave em `js/config.js` (`GOOGLE_MAPS_API_KEY`), faça commit e push. A Vercel publica sozinha.
 8. (Opcional, recomendado para produção) **Google Maps Platform → Gerenciamento de mapas → Criar ID do mapa** (tipo JavaScript, vetorial) e cole em `GOOGLE_MAPS_MAP_ID`.
 
-Se a chave for recusada (domínio fora da lista, API não ativada), o site mostra "Não foi possível exibir o mapa" e a lista continua funcionando.
+Se a chave for recusada (domínio fora da lista, API não ativada, cota esgotada), o site mostra "O mapa está indisponível agora" sobre o mapa e a lista continua funcionando. O motivo técnico aparece no console do navegador.
 
 ## Publicar na Vercel
 

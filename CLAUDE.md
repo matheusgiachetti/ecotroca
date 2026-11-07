@@ -77,6 +77,7 @@ BASE_URL=https://ecotroca-xi.vercel.app python -m pytest tests   # contra produ�
 ```
 
 - A suíte (`tests/test_01…test_10`) segue os itens da auditoria: mapa, localização, cartão, filtros, seções/feedback, layout, head/404, segurança, desempenho/acessibilidade. Ela lê os pontos reais do Supabase e falha se o projeto estiver pausado.
+- **Cota do Google Maps:** o projeto do Google Cloud não tem faturamento, então a chave é uma *demo key* com cota diária pequena, compartilhada com o site em produção. Teste novo só usa `abrir(..., mapa=True)` se precisar mesmo do mapa real; não rode a suíte em loop nem crie scripts que recarregam a página com o mapa. `SEM_MAPA=1` pula os testes de mapa.
 - Rode a suíte inteira antes de qualquer push na `main`. Funcionalidade nova ganha teste novo no arquivo do item correspondente.
 - Dados controlados (telefone, HTML malicioso, filtro sem resultado) são simulados com `responder_supabase()` em `tests/conftest.py`, sem tocar no banco.
 - Geolocalização é emulada pelo Playwright; GPS real só dá para conferir num celular.
