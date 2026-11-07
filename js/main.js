@@ -16,6 +16,7 @@ import {
 } from './geo.js';
 import { iniciarMapa } from './map.js';
 import { iniciarConta } from './conta.js';
+import { iniciarRanking } from './ranking.js';
 
 document.documentElement.classList.add('js');
 
@@ -472,6 +473,7 @@ function iniciarAnimacoes() {
 function iniciar() {
   iniciarMenu();
   conta = iniciarConta();
+  iniciarRanking();
   iniciarFeedback();
   iniciarAnimacoes();
 

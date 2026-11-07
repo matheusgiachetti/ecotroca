@@ -167,6 +167,8 @@ export function iniciarConta() {
 
   // ---------- Menu ----------
   function atualizarMenu() {
+    // Avisa o resto da página (ex.: o ranking) de que entrou ou saiu alguém
+    document.dispatchEvent(new CustomEvent('ecotroca:sessao', { detail: { logado: !!sessao } }));
     if (sessao) {
       botaoConta.replaceChildren(criar('span', 'sr-only', 'Minha conta: '), document.createTextNode(apelidoDe(sessao)));
       botaoSair.hidden = false;
@@ -426,6 +428,7 @@ export function iniciarConta() {
         formDescarte.hidden = true;
         resultadoEl.hidden = false;
         anunciar(`Descarte registrado. ${$('#descarte-resultado-texto').textContent}`);
+        document.dispatchEvent(new CustomEvent('ecotroca:pontos')); // o ranking se atualiza
         $('#descarte-outro').focus();
       } catch (erro) {
         if (erro.codigo === 'nao_logado') {
