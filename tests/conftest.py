@@ -53,12 +53,16 @@ CATEGORIAS = [
 ]
 
 
-def supabase_rest(metodo, caminho, corpo=None, cabecalhos=None):
-    """Chamada direta à API REST do Supabase com a chave PÚBLICA. Devolve (status, json|texto)."""
+def supabase_rest(metodo, caminho, corpo=None, cabecalhos=None, token=None, base="rest/v1"):
+    """Chamada direta à API do Supabase com a chave PÚBLICA. Devolve (status, json|texto).
+
+    `token` é o access_token de um usuário logado (sem ele, a chamada é anônima).
+    `base` é "rest/v1" (tabelas e RPC) ou "auth/v1" (cadastro e login).
+    """
     dados = json.dumps(corpo).encode() if corpo is not None else None
-    req = urllib.request.Request(f"{SUPABASE_URL}/rest/v1/{caminho}", data=dados, method=metodo)
+    req = urllib.request.Request(f"{SUPABASE_URL}/{base}/{caminho}", data=dados, method=metodo)
     req.add_header("apikey", SUPABASE_ANON_KEY)
-    req.add_header("Authorization", f"Bearer {SUPABASE_ANON_KEY}")
+    req.add_header("Authorization", f"Bearer {token or SUPABASE_ANON_KEY}")
     req.add_header("Content-Type", "application/json")
     for chave, valor in (cabecalhos or {}).items():
         req.add_header(chave, valor)
