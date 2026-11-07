@@ -14,9 +14,10 @@ Guia de referência para quem (pessoa ou agente) for mexer neste repositório. L
 - **Fluxo principal:** "Encontrar ponto de coleta" → permitir localização → lista ordenada por distância, primeiro item com selo "Mais próximo" → detalhes (horário, resíduos aceitos, telefone, status, fonte) → "Como chegar" (abre rota no Google Maps).
 - **Confiabilidade dos dados é parte do produto:** cada ponto mostra "Verificado" ou "Em verificação" e a fonte. Não se cadastra ponto sem coordenada confiável ("para não levar ninguém ao lugar errado"). `verificado = true` só depois de confirmar com a fonte (telefone 156 da Prefeitura ou visita).
 - **Feedback:** link "Dê sua opinião" para um Google Forms (abaixo da lista e no rodapé).
-- **Conta e pontos (base pronta no banco e no `data.js`; a interface visual de conta é a próxima etapa):** cadastro/login por e-mail e senha com apelido único, descartes registrados por proximidade, pontos, níveis (Semente 0–49, Broto 50–149, Muda 150–349, Árvore 350–699, Floresta 700+). Quem não entra na conta usa o mapa e a lista normalmente: **o fluxo sem login nunca pode depender de conta**.
+- **Conta e pontos (banco, `data.js` e interface na própria página única):** cadastro/login por e-mail e senha com apelido único, descartes registrados por proximidade, pontos, níveis (Semente 0–49, Broto 50–149, Muda 150–349, Árvore 350–699, Floresta 700+). Quem não entra na conta usa o mapa e a lista normalmente: **o fluxo sem login nunca pode depender de conta**.
 - **Limitação conhecida da confirmação do descarte:** sem foto ou QR code, o descarte é aceito só por **proximidade** (até 200 m do ponto, pela posição que o navegador informa, que dá para falsear) e pelos **limites diários** (5 registros e 30 itens por dia). É dissuasão, não prova. Qualquer recompensa real ou ranking público precisa de uma confirmação mais forte (QR no ponto, foto ou validação do responsável) antes de valer algo.
-- **Fora do escopo atual:** interface visual de conta e de pontos, ranking, recompensas, métricas de impacto, painel administrativo.
+- **Interface de conta (`js/conta.js`):** botão "Entrar" no menu (vira o apelido + "Sair"), painel de entrar/criar conta/minha conta (nível com barra, pontos, descartes, itens, kg com o rótulo "estimativa") e, no cartão de cada ponto, "Registrar descarte" (tipo → quantidade 1 a 10 → confirmar). **A localização só é pedida depois do clique em "Confirmar descarte".** Sem login o botão abre o painel de entrada e, depois de entrar, volta para o descarte. Painéis são `<dialog>` nativos: Esc fecha e o foco volta a quem abriu.
+- **Fora do escopo atual:** histórico de descartes, ranking, recompensas, métricas de impacto, painel administrativo.
 
 Seções da página (`index.html`): Início (hero) · Mapa · Como funciona · O que descartar · Dúvidas · Sobre · Rodapé.
 
@@ -41,7 +42,8 @@ js/config.js               valores PÚBLICOS: URL/chave publishable do Supabase,
                            link do Forms, centro/zoom padrão. Placeholder = começa com "COLE_"
 js/main.js                 interface: estado, lista, filtros, detalhes, localização, menu, animações
 js/map.js                  TUDO do Google Maps, isolado atrás de um "controlador"
-js/data.js                 acesso a dados (Supabase ou JSON de demonstração) + normalização
+js/data.js                 acesso a dados (Supabase ou JSON de demonstração) + normalização + conta e pontos (cadastrar, entrar, registrarDescarte…)
+js/conta.js                interface dos painéis de conta e de registrar descarte (<dialog>); só usa funções do data.js
 js/geo.js                  geolocalização, Haversine, formatação de distância, link "Como chegar"
 data/pontos-exemplo.json   pontos fictícios do modo demonstração
 supabase/schema.sql        tabela pontos_coleta + constraints + RLS (idempotente)
@@ -83,6 +85,7 @@ BASE_URL=https://ecotroca-xi.vercel.app python -m pytest tests   # contra produ�
 ```
 
 - A suíte (`tests/test_01…test_10`) segue os itens da auditoria: mapa, localização, cartão, filtros, seções/feedback, layout, head/404, segurança, desempenho/acessibilidade. Ela lê os pontos reais do Supabase e falha se o projeto estiver pausado.
+- `test_13_interface_conta.py` testa a interface de conta (cadastro, sair, entrar, registrar descarte com a posição simulada, erros de distância, limite e permissão, e o site sem login) em 375 e 1280 px.
 - `test_11_pontos_banco.py` e `test_12_data_js.py` cobrem conta e pontos (RLS, isolamento entre usuários, 200 m, quantidade, 5 registros e 30 itens por dia, apelido inválido). Eles **criam usuários reais** `teste-ecotroca-*@example.com` pela API de Auth (precisa da confirmação de e-mail desligada). A chave pública não apaga usuário: depois de rodar, apague com `delete from auth.users where email like 'teste-ecotroca-%@example.com';` (SQL Editor ou MCP). Nunca deixe usuário de teste no banco de produção.
 - **Cota do Google Maps:** o projeto do Google Cloud não tem faturamento, então a chave é uma *demo key* com cota diária pequena, compartilhada com o site em produção. Teste novo só usa `abrir(..., mapa=True)` se precisar mesmo do mapa real; não rode a suíte em loop nem crie scripts que recarregam a página com o mapa. `SEM_MAPA=1` pula os testes de mapa.
 - Rode a suíte inteira antes de qualquer push na `main`. Funcionalidade nova ganha teste novo no arquivo do item correspondente.

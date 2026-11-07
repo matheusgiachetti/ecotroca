@@ -19,7 +19,8 @@ css/styles.css          estilos (mobile-first)
 js/config.js            chaves e configurações públicas (placeholders começam com "COLE_")
 js/main.js              interface: lista, filtros, detalhes, menu, animações
 js/map.js               tudo do Google Maps (isolado: trocar de mapa = reescrever só este arquivo)
-js/data.js              leitura dos pontos no Supabase (ou JSON de exemplo no modo demonstração)
+js/data.js              pontos de coleta no Supabase (ou JSON de exemplo no modo demonstração), conta e pontos
+js/conta.js             painéis de conta e de registrar descarte (<dialog>)
 js/geo.js               geolocalização, distância (Haversine) e link "Como chegar"
 data/pontos-exemplo.json   pontos fictícios do modo demonstração
 supabase/schema.sql     tabela pontos_coleta + RLS
@@ -199,9 +200,11 @@ Marque `verificado = true` só depois de confirmar com a fonte; o site mostra "V
 - **Domínio:** `ecotroca.vercel.app` já pertence a outra conta; o projeto ficou com `ecotroca-xi.vercel.app`. As tags `og:url`, `og:image` e `canonical` usam esse domínio — troque se configurar um domínio próprio.
 - O arquivo `UPX_S2.html` (estrutura inicial do grupo) foi mantido sem alterações.
 
-## Conta e pontos (base pronta; sem interface ainda)
+## Conta e pontos
 
-O banco e o `js/data.js` já têm: cadastro e login por e-mail e senha (com apelido único de 3 a 20 caracteres: letras, números e `_`), registro de descartes por proximidade, pontos e níveis. A tela de conta e de pontos é a próxima etapa; hoje quem não entra na conta usa o site exatamente como antes.
+O banco, o `js/data.js` e a interface (`js/conta.js`, painéis na própria página) têm: cadastro e login por e-mail e senha (com apelido único de 3 a 20 caracteres: letras, números e `_`), registro de descartes por proximidade, pontos e níveis. Quem não entra na conta usa o site exatamente como antes.
+
+**Na página:** botão **Entrar** no menu (depois vira o apelido e **Sair**); no cartão de cada ponto, **Registrar descarte** (escolher o tipo, a quantidade de 1 a 10 e confirmar; só então o site pede a localização); **Minha conta** (nível com barra até o próximo, pontos, descartes, itens e kg estimados). O histórico de descartes fica para a próxima etapa. O apelido mostrado no menu vem do cadastro; se ele for alterado direto no banco, a página só atualiza depois de sair e entrar de novo.
 
 **Como funciona o descarte:** a função `registrar_descarte` (SQL, `supabase/05-rpc-pontos.sql`) exige login, confere que a pessoa está a até **200 m** do ponto (a posição não é guardada), aceita **5 registros e 30 itens por dia** (dia de Brasília) e calcula pontos e peso no banco. Níveis: Semente 0–49, Broto 50–149, Muda 150–349, Árvore 350–699, Floresta 700+.
 
@@ -221,11 +224,11 @@ O banco e o `js/data.js` já têm: cadastro e login por e-mail e senha (com apel
 
 **Apagar pontos:** não rode `pontos-reais.sql` (ele apaga e reinsere pontos) depois que houver descartes: o histórico fica com `ponto_id` vazio. Para corrigir um ponto, use `update`.
 
-**Usuários de teste:** a suíte cria contas `teste-ecotroca-*@example.com` pela API de Auth. A chave pública não consegue apagá-las; depois de rodar `tests/test_11` e `test_12`, remova-as no SQL Editor: `delete from auth.users where email like 'teste-ecotroca-%@example.com';` (perfis e descartes saem junto).
+**Usuários de teste:** a suíte cria contas `teste-ecotroca-*@example.com` pela API de Auth. A chave pública não consegue apagá-las; depois de rodar `tests/test_11`, `test_12` e `test_13`, remova-as no SQL Editor: `delete from auth.users where email like 'teste-ecotroca-%@example.com';` (perfis e descartes saem junto).
 
 ## Próximos passos (fora do escopo atual)
 
-Interface de conta e de pontos, ranking, recompensas, métricas de impacto e painel administrativo. O código já está separado para isso: `data.js` concentra o acesso ao banco (novas tabelas e Supabase Auth entram aqui), `map.js` isola o mapa e `main.js` cuida só da interface.
+Histórico de descartes, ranking, recompensas, métricas de impacto e painel administrativo. O código já está separado para isso: `data.js` concentra o acesso ao banco (novas tabelas e Supabase Auth entram aqui), `map.js` isola o mapa e `main.js` cuida só da interface.
 
 ## Créditos
 
