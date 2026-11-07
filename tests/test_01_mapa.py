@@ -4,7 +4,7 @@ from conftest import esperar_lista, esperar_marcadores
 
 
 def test_mapa_carrega_com_pontos_do_supabase(abrir, pontos_db):
-    p = abrir("/", largura=1280, altura=900)
+    p = abrir("/", largura=1280, altura=900, mapa=True)
     page = p.page
     esperar_lista(page)
 
@@ -14,8 +14,8 @@ def test_mapa_carrega_com_pontos_do_supabase(abrir, pontos_db):
     assert sorted(nomes_lista) == sorted(l["nome"] for l in pontos_db)
 
     # O mapa do Google foi desenhado e tem um marcador por ponto
-    page.wait_for_selector("#mapa-google .gm-style", timeout=25000)
     esperar_marcadores(page, len(pontos_db))
+    assert page.locator("#mapa-google .gm-style").count() == 1
     assert page.locator("#mapa-google .mapa__aviso").count() == 0, "aviso de erro apareceu com a chave válida"
     assert page.get_by_text("For development purposes only").count() == 0, "Google exige faturamento"
     assert p.erros == [], p.erros
@@ -23,9 +23,9 @@ def test_mapa_carrega_com_pontos_do_supabase(abrir, pontos_db):
 
 def test_aviso_sobreposto_quando_a_chave_e_recusada(abrir, servidor_porta_errada, pontos_db):
     # Porta fora da lista de referenciadores da chave: o Google recusa (gm_authFailure)
-    p = abrir("/", largura=1280, altura=900, base=servidor_porta_errada)
+    p = abrir("/", largura=1280, altura=900, base=servidor_porta_errada, mapa=True)
     page = p.page
-    aviso = page.locator("#mapa-google .mapa__aviso", has_text="Não foi possível exibir o mapa.")
+    aviso = page.locator("#mapa-google .mapa__aviso", has_text="O mapa está indisponível agora.")
     aviso.wait_for(timeout=25000)
     assert page.locator("#mapa-google .mapa__aviso").count() == 1  # substituiu o "Carregando o mapa…"
 

@@ -364,12 +364,14 @@ async function carregarMapa() {
   try {
     const controlador = await iniciarMapa(el.mapa, {
       aoClicarPonto: (id) => selecionar(id, 'mapa'),
+      // O Google recusou o mapa (chave, domínio não autorizado ou cota esgotada).
+      // O motivo técnico já aparece no console pelo próprio Google; aqui fica só o que ajuda o visitante.
       aoFalhar: () => {
         falhou = true;
         estado.mapa = null;
         avisoNoMapa(
-          'Não foi possível exibir o mapa.',
-          'A chave do Google Maps foi recusada (verifique a chave e as restrições de domínio). A lista de pontos continua funcionando.'
+          'O mapa está indisponível agora.',
+          'A lista de pontos continua funcionando, com a distância até cada um e o botão “Como chegar”.'
         );
       },
     });
