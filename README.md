@@ -22,12 +22,13 @@ js/map.js               tudo do Google Maps (isolado: trocar de mapa = reescreve
 js/data.js              pontos de coleta no Supabase (ou JSON de exemplo no modo demonstração), conta e pontos
 js/conta.js             painéis de conta e de registrar descarte (<dialog>)
 js/ranking.js           seção Ranking (top 10 por período e cidade)
+js/regras.js            seção "Como os pontos funcionam" (lê regras_pontos() do banco)
 js/geo.js               geolocalização, distância (Haversine) e link "Como chegar"
 data/pontos-exemplo.json   pontos fictícios do modo demonstração
 supabase/schema.sql     tabela pontos_coleta + RLS
 supabase/seed.sql       5 pontos de EXEMPLO (fictícios)
-supabase/02-perfis.sql, 03-tipos-residuo.sql, 04-descartes.sql, 05-rpc-pontos.sql, 06-ranking.sql
-                        conta, pontos, descartes e ranking (rodar nesta ordem, depois do schema.sql)
+supabase/02-perfis.sql, 03-tipos-residuo.sql, 04-descartes.sql, 05-rpc-pontos.sql, 06-ranking.sql, 07-medalhas.sql
+                        conta, pontos, descartes, ranking e medalhas (rodar nesta ordem, 02 a 07, depois do schema.sql)
 supabase/pontos-reais.sql  4 pontos reais de Sorocaba (em verificação)
 assets/                 logo, ícones e fotos otimizadas
 vercel.json             cabeçalhos para a hospedagem estática
@@ -62,7 +63,7 @@ python -m pytest tests              # testa http://localhost:5173
 
 Para testar o site publicado: `BASE_URL=https://ecotroca-xi.vercel.app python -m pytest tests` (no PowerShell: `$env:BASE_URL="https://ecotroca-xi.vercel.app"; python -m pytest tests`).
 
-O SQL do ranking também é testado num Postgres local descartável (`test_14_ranking_sql_local.py`, precisa de `python -m pip install pgserver "psycopg[binary]" tzdata`; sem isso o teste é pulado). Criar muitos usuários de teste em poucos minutos esbarra no limite do Auth (`429`): espere uns 5 minutos entre as rodadas.
+O SQL do ranking e o das medalhas também são testados num Postgres local descartável (`test_14_ranking_sql_local.py` e `test_15_medalhas_sql_local.py`, precisa de `python -m pip install pgserver "psycopg[binary]" tzdata`; sem isso o teste é pulado). Criar muitos usuários de teste em poucos minutos esbarra no limite do Auth (`429`): espere uns 5 minutos entre as rodadas.
 
 Para poupar a cota do Google Maps (veja "Chave do Google Maps"), só ~7 testes carregam o mapa de verdade; nos outros o script do Maps é bloqueado. Com `SEM_MAPA=1` esses também são pulados.
 
@@ -207,9 +208,11 @@ Marque `verificado = true` só depois de confirmar com a fonte; o site mostra "V
 
 O banco, o `js/data.js` e a interface (`js/conta.js`, painéis na própria página) têm: cadastro e login por e-mail e senha (com apelido único de 3 a 20 caracteres: letras, números e `_`), registro de descartes por proximidade, pontos e níveis. Quem não entra na conta usa o site exatamente como antes.
 
-**Na página:** botão **Entrar** no menu (depois vira o apelido e **Sair**); no cartão de cada ponto, **Registrar descarte** (escolher o tipo, a quantidade de 1 a 10 e confirmar; só então o site pede a localização); **Minha conta** (nível com barra até o próximo, pontos, descartes, itens e kg estimados). O histórico de descartes fica para a próxima etapa. O apelido mostrado no menu vem do cadastro; se ele for alterado direto no banco, a página só atualiza depois de sair e entrar de novo.
+**Na página:** botão **Entrar** no menu (depois vira o apelido e **Sair**); no cartão de cada ponto, **Registrar descarte** (escolher o tipo, a quantidade de 1 a 10 e confirmar; só então o site pede a localização); **Minha conta** (nível com barra até o próximo, pontos, descartes, itens, kg estimados e **Medalhas**). O histórico de descartes fica para a próxima etapa. O apelido mostrado no menu vem do cadastro; se ele for alterado direto no banco, a página só atualiza depois de sair e entrar de novo.
 
 **Como funciona o descarte:** a função `registrar_descarte` (SQL, `supabase/05-rpc-pontos.sql`) exige login, confere que a pessoa está a até **200 m** do ponto (a posição não é guardada), aceita **5 registros e 30 itens por dia** (dia de Brasília) e calcula pontos e peso no banco. Níveis: Semente 0–49, Broto 50–149, Muda 150–349, Árvore 350–699, Floresta 700+.
+
+**Fonte única dos números:** raio, limites diários, quantidade máxima por registro, fuso e níveis ficam **só** na função `regras_limites()` (`05-rpc-pontos.sql`). `registrar_descarte`, `nivel_por_pontos` e a função pública `regras_pontos()` leem dela, e o site mostra o que `regras_pontos()` devolve (seção **Pontos** da página, barra de nível, limites do formulário). Para mudar uma regra, mude lá e reaplique o SQL: o site acompanha sozinho. Os pontos por tipo vêm de `tipos_residuo`.
 
 | Tipo de resíduo | Pontos por item | Peso estimado por item |
 |---|---|---|
@@ -227,7 +230,7 @@ O banco, o `js/data.js` e a interface (`js/conta.js`, painéis na própria pági
 
 **Apagar pontos:** não rode `pontos-reais.sql` (ele apaga e reinsere pontos) depois que houver descartes: o histórico fica com `ponto_id` vazio. Para corrigir um ponto, use `update`.
 
-**Usuários de teste:** a suíte cria contas `teste-ecotroca-*@example.com` pela API de Auth. A chave pública não consegue apagá-las; depois de rodar `tests/test_11`, `test_12`, `test_13` e `test_14`, remova-as no SQL Editor: `delete from auth.users where email like 'teste-ecotroca-%@example.com';` (perfis e descartes saem junto).
+**Usuários de teste:** a suíte cria contas `teste-ecotroca-*@example.com` pela API de Auth. A chave pública não consegue apagá-las; depois de rodar `tests/test_11`, `test_12`, `test_13`, `test_14` e `test_16`, remova-as no SQL Editor: `delete from auth.users where email like 'teste-ecotroca-%@example.com';` (perfis e descartes saem junto).
 
 ## Ranking
 
@@ -236,6 +239,16 @@ Seção **Ranking** na página: top 10 por **Semana** (segunda a domingo), **Mê
 **Privacidade:** o ranking é público e mostra **só apelido, cidade, pontos do período e posição**. Não expõe id, e-mail nem dados de descarte. Desempate: pontos do período e, depois, o apelido (ordem alfabética). O limite é de no máximo 50 posições; valor inválido vira 10. As funções (`ranking`, `minha_posicao`) estão em `supabase/06-ranking.sql` e somam os descartes no banco; `anon` e `authenticated` continuam sem ler `profiles` nem `descartes` diretamente.
 
 > **Aplicar o `06-ranking.sql` no SQL Editor ANTES de publicar:** sem ele a seção mostra "Não foi possível carregar o ranking agora" (o site continua funcionando, e o mapa e a lista não são afetados). O arquivo é idempotente.
+
+## Medalhas e impacto
+
+**Medalhas** (`supabase/07-medalhas.sql`): Primeiro descarte, 10 itens descartados (somando os registros), 3 tipos de resíduo diferentes e 100 pontos. Quem concede é **o banco, dentro de `registrar_descarte`**, depois de gravar o descarte (`on conflict do nothing`: nunca duas vezes); o navegador nunca concede. **Medalha não dá pontos** (`pontos_total` só muda pelo valor do descarte). `registrar_descarte` devolve `medalhas_novas` (os nomes ganhos naquela chamada) e `minhas_medalhas()` lista todas, com `conquistada` verdadeiro ou falso. As tabelas `medalhas` e `usuario_medalhas` têm RLS: cada pessoa lê só as próprias conquistas, `anon` não lê nada e ninguém escreve direto. Os limiares (10 itens, 3 tipos, 100 pontos) estão em `conceder_medalhas()` e repetidos no texto das descrições da tabela `medalhas`; se mudar um, mude o outro.
+
+**Impacto:** o site mostra só o **peso estimado** (kg), sempre com o rótulo "estimativa" e a frase "peso médio por item, por tipo de resíduo". **Não há equivalências ambientais** (CO2, árvores etc.): nenhum fator tem fonte verificada no projeto, então nenhuma é exibida. Só acrescente uma com fonte citável.
+
+**Seção "Como os pontos funcionam"** (link **Pontos** no menu): pontos por tipo, níveis, medalhas e limites diários, tudo lido de `regras_pontos()`.
+
+> **Ordem de aplicação:** no SQL Editor, rode `05-rpc-pontos.sql` e depois `07-medalhas.sql` (os dois são idempotentes e podem ir na mesma execução). Só depois faça o push. O `05` sozinho continua registrando descartes (só não há medalhas até o `07`); sem o `07` a seção Pontos e a lista de medalhas mostram erro com "Tentar de novo".
 
 ## Próximos passos (fora do escopo atual)
 
