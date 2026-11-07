@@ -97,6 +97,7 @@ const MENSAGENS_DO_BANCO = {
   tipo_inexistente: 'Não encontramos esse tipo de resíduo.',
   coordenadas_invalidas: 'Não foi possível ler a sua localização.',
   perfil_inexistente: 'Não encontramos o seu perfil. Saia e entre de novo.',
+  periodo_invalido: 'Período inválido. Escolha semana, mês ou geral.',
 };
 const ERRO_GENERICO = 'Algo deu errado. Verifique sua conexão e tente de novo.';
 
@@ -252,4 +253,54 @@ export async function meuResumo() {
     itens: data.itens,
     kgEstimados: Number(data.kg_estimados),
   };
+}
+
+// =====================================================================
+// Ranking
+// Público: só apelido, cidade, pontos do período e posição (nunca id, e-mail
+// nem dados de descarte). A soma e a ordem são feitas no banco, em
+// supabase/06-ranking.sql.
+// =====================================================================
+
+export const PERIODOS_RANKING = ['semana', 'mes', 'geral'];
+export const LIMITE_RANKING = 10;
+
+function validarPeriodo(periodo) {
+  if (!PERIODOS_RANKING.includes(periodo)) {
+    throw new ErroEcotroca('periodo_invalido', MENSAGENS_DO_BANCO.periodo_invalido);
+  }
+}
+
+/**
+ * Top do ranking: [{ posicao, apelido, cidade, pontos }].
+ * `cidade` nula = todas as cidades. Não exige login.
+ */
+export async function ranking(periodo = 'geral', cidade = null, limite = LIMITE_RANKING) {
+  validarPeriodo(periodo);
+  const cliente = await clienteDeConta();
+  const { data, error } = await cliente.rpc('ranking', {
+    p_periodo: periodo,
+    p_cidade: cidade || null,
+    p_limite: limite,
+  });
+  if (error) throw traduzirErro(error, 'Não foi possível carregar o ranking agora. Tente de novo.');
+  return (data || []).map((l) => ({ posicao: l.posicao, apelido: l.apelido, cidade: l.cidade, pontos: l.pontos }));
+}
+
+/** A posição da pessoa logada no período: { posicao, pontos }, ou null se ela não pontuou. */
+export async function minhaPosicao(periodo = 'geral', cidade = null) {
+  validarPeriodo(periodo);
+  const cliente = await clienteDeConta();
+  const { data, error } = await cliente.rpc('minha_posicao', { p_periodo: periodo, p_cidade: cidade || null });
+  if (error) throw traduzirErro(error, 'Não foi possível ver a sua posição agora.');
+  const linha = Array.isArray(data) ? data[0] : null;
+  return linha ? { posicao: linha.posicao, pontos: linha.pontos } : null;
+}
+
+/** Apelido e cidade da pessoa logada (a RLS só deixa ler a própria linha), ou null. */
+export async function meuPerfil() {
+  const cliente = await clienteDeConta();
+  const { data, error } = await cliente.from('profiles').select('apelido, cidade').limit(1).maybeSingle();
+  if (error) throw traduzirErro(error);
+  return data ? { apelido: data.apelido, cidade: data.cidade } : null;
 }
