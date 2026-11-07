@@ -14,3 +14,7 @@ node_modules/
 .env
 .env.*
 *.local
+
+# Testes (Python)
+__pycache__/
+.pytest_cache/

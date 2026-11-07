@@ -1,0 +1,6 @@
+# Dependências só dos testes (o site em si não tem dependências).
+# python -m pip install -r tests/requirements.txt
+# python -m playwright install chromium
+playwright==1.64.0
+pytest==9.2.0
+pillow>=11
