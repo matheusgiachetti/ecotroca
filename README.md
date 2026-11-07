@@ -21,12 +21,13 @@ js/main.js              interface: lista, filtros, detalhes, menu, animações
 js/map.js               tudo do Google Maps (isolado: trocar de mapa = reescrever só este arquivo)
 js/data.js              pontos de coleta no Supabase (ou JSON de exemplo no modo demonstração), conta e pontos
 js/conta.js             painéis de conta e de registrar descarte (<dialog>)
+js/ranking.js           seção Ranking (top 10 por período e cidade)
 js/geo.js               geolocalização, distância (Haversine) e link "Como chegar"
 data/pontos-exemplo.json   pontos fictícios do modo demonstração
 supabase/schema.sql     tabela pontos_coleta + RLS
 supabase/seed.sql       5 pontos de EXEMPLO (fictícios)
-supabase/02-perfis.sql, 03-tipos-residuo.sql, 04-descartes.sql, 05-rpc-pontos.sql
-                        conta, pontos e descartes (rodar nesta ordem, depois do schema.sql)
+supabase/02-perfis.sql, 03-tipos-residuo.sql, 04-descartes.sql, 05-rpc-pontos.sql, 06-ranking.sql
+                        conta, pontos, descartes e ranking (rodar nesta ordem, depois do schema.sql)
 supabase/pontos-reais.sql  4 pontos reais de Sorocaba (em verificação)
 assets/                 logo, ícones e fotos otimizadas
 vercel.json             cabeçalhos para a hospedagem estática
@@ -60,6 +61,8 @@ python -m pytest tests              # testa http://localhost:5173
 ```
 
 Para testar o site publicado: `BASE_URL=https://ecotroca-xi.vercel.app python -m pytest tests` (no PowerShell: `$env:BASE_URL="https://ecotroca-xi.vercel.app"; python -m pytest tests`).
+
+O SQL do ranking também é testado num Postgres local descartável (`test_14_ranking_sql_local.py`, precisa de `python -m pip install pgserver "psycopg[binary]" tzdata`; sem isso o teste é pulado). Criar muitos usuários de teste em poucos minutos esbarra no limite do Auth (`429`): espere uns 5 minutos entre as rodadas.
 
 Para poupar a cota do Google Maps (veja "Chave do Google Maps"), só ~7 testes carregam o mapa de verdade; nos outros o script do Maps é bloqueado. Com `SEM_MAPA=1` esses também são pulados.
 
@@ -224,11 +227,19 @@ O banco, o `js/data.js` e a interface (`js/conta.js`, painéis na própria pági
 
 **Apagar pontos:** não rode `pontos-reais.sql` (ele apaga e reinsere pontos) depois que houver descartes: o histórico fica com `ponto_id` vazio. Para corrigir um ponto, use `update`.
 
-**Usuários de teste:** a suíte cria contas `teste-ecotroca-*@example.com` pela API de Auth. A chave pública não consegue apagá-las; depois de rodar `tests/test_11`, `test_12` e `test_13`, remova-as no SQL Editor: `delete from auth.users where email like 'teste-ecotroca-%@example.com';` (perfis e descartes saem junto).
+**Usuários de teste:** a suíte cria contas `teste-ecotroca-*@example.com` pela API de Auth. A chave pública não consegue apagá-las; depois de rodar `tests/test_11`, `test_12`, `test_13` e `test_14`, remova-as no SQL Editor: `delete from auth.users where email like 'teste-ecotroca-%@example.com';` (perfis e descartes saem junto).
+
+## Ranking
+
+Seção **Ranking** na página: top 10 por **Semana** (segunda a domingo), **Mês** ou **Geral** (fuso de Brasília), para **Todas as cidades** ou **Minha cidade** (só para quem está logado). Quem está logado e fora do top 10 vê a própria posição abaixo da lista. Sem pontuação no período: "Ninguém pontuou ainda neste período."
+
+**Privacidade:** o ranking é público e mostra **só apelido, cidade, pontos do período e posição**. Não expõe id, e-mail nem dados de descarte. Desempate: pontos do período e, depois, o apelido (ordem alfabética). O limite é de no máximo 50 posições; valor inválido vira 10. As funções (`ranking`, `minha_posicao`) estão em `supabase/06-ranking.sql` e somam os descartes no banco; `anon` e `authenticated` continuam sem ler `profiles` nem `descartes` diretamente.
+
+> **Aplicar o `06-ranking.sql` no SQL Editor ANTES de publicar:** sem ele a seção mostra "Não foi possível carregar o ranking agora" (o site continua funcionando, e o mapa e a lista não são afetados). O arquivo é idempotente.
 
 ## Próximos passos (fora do escopo atual)
 
-Histórico de descartes, ranking, recompensas, métricas de impacto e painel administrativo. O código já está separado para isso: `data.js` concentra o acesso ao banco (novas tabelas e Supabase Auth entram aqui), `map.js` isola o mapa e `main.js` cuida só da interface.
+Histórico de descartes, recompensas, métricas de impacto e painel administrativo. O código já está separado para isso: `data.js` concentra o acesso ao banco (novas tabelas e Supabase Auth entram aqui), `map.js` isola o mapa e `main.js` cuida só da interface.
 
 ## Créditos
 
