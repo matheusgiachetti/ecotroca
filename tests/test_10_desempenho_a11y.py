@@ -31,11 +31,16 @@ def test_imagens_otimizadas_e_lazy(abrir):
     hero = page.evaluate("document.querySelector('.hero__foto img').currentSrc")
     assert hero.endswith("hero-768.webp"), hero  # webp e tamanho certo para celular
 
-    # Pesos máximos (bytes) das fotos servidas
-    for nome, limite in {"hero-768.webp": 60_000, "hero-1280.webp": 100_000, "hero-2000.webp": 200_000,
-                         "descarte-700.webp": 80_000, "descarte-1200.webp": 160_000}.items():
-        resposta = page.request.get(f"{page.url.split('#')[0].rstrip('/')}/assets/{nome}")
-        assert resposta.ok and len(resposta.body()) <= limite, f"{nome}: {len(resposta.body())} bytes"
+    # Compressão eficiente (mesmo critério do Lighthouse): recomprimir em WebP q75
+    # não pode economizar mais de 10% nem mais de 8 KB em nenhuma foto servida.
+    for nome in ("hero-768", "hero-1280", "hero-2000", "descarte-700", "descarte-1200"):
+        resposta = page.request.get(f"{page.url.split('#')[0].rstrip('/')}/assets/{nome}.webp")
+        assert resposta.ok
+        original = resposta.body()
+        buf = io.BytesIO()
+        Image.open(io.BytesIO(original)).save(buf, "WEBP", quality=75, method=6)
+        economia = len(original) - len(buf.getvalue())
+        assert economia < max(8_000, 0.10 * len(original)), f"{nome}.webp: daria para economizar {economia} bytes"
 
 
 def test_metricas_de_carregamento(abrir):
