@@ -124,6 +124,10 @@ function traduzirErro(erro, padrao = ERRO_GENERICO) {
   if (erro instanceof ErroEcotroca) return erro;
   const hint = erro && erro.hint;
   if (hint && MENSAGENS_DO_BANCO[hint]) return new ErroEcotroca(hint, MENSAGENS_DO_BANCO[hint]);
+  // Limite de requisições do Auth (muitas tentativas de cadastro ou login em pouco tempo)
+  if (erro && (erro.status === 429 || erro.code === 'over_request_rate_limit' || erro.code === 'over_email_send_rate_limit')) {
+    return new ErroEcotroca('muitas_tentativas', 'Muitas tentativas em pouco tempo. Espere alguns minutos e tente de novo.');
+  }
   // Sem sessão, o banco nem deixa o papel anônimo executar a função (permission denied, sem HINT)
   if (erro && erro.code === '42501') return new ErroEcotroca('nao_logado', MENSAGENS_DO_BANCO.nao_logado);
   console.error('[Ecotroca] Erro não mapeado:', erro);

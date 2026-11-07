@@ -148,3 +148,24 @@ def test_modo_demonstracao_nao_tem_conta(abrir):
     assert chamar(p.page, "return await d.sessaoAtual();") is None
     r = chamar(p.page, "return await d.entrar('a@example.com', 'x');")
     assert r["erro"]["codigo"] == "sem_supabase"
+
+
+def test_limite_de_tentativas_do_auth_vira_mensagem_clara(abrir):
+    # Resposta 429 simulada: não gasta o limite real do Auth
+    def preparar(page):
+        def limite(route):
+            cors = {"access-control-allow-origin": "*", "access-control-allow-headers": "*", "access-control-allow-methods": "POST, OPTIONS"}
+            if route.request.method == "OPTIONS":
+                return route.fulfill(status=204, headers=cors)
+            route.fulfill(status=429, headers={**cors, "content-type": "application/json"},
+                          body='{"code":429,"error_code":"over_request_rate_limit","msg":"Request rate limit reached"}')
+        page.route("**/auth/v1/signup", limite)
+        page.route("**/auth/v1/token**", limite)
+
+    p = abrir("/", largura=1280, altura=900, preparar=preparar)
+    p.page.wait_for_selector("#lista-pontos .ponto", timeout=25000)
+    esperado = "Muitas tentativas em pouco tempo. Espere alguns minutos e tente de novo."
+    r = chamar(p.page, "return await d.cadastrar('alguem@example.com', 'senha-ok-123', 'apelido_ok');")
+    assert r["erro"]["codigo"] == "muitas_tentativas" and r["erro"]["mensagem"] == esperado
+    r = chamar(p.page, "return await d.entrar('alguem@example.com', 'senha-ok-123');")
+    assert r["erro"]["codigo"] == "muitas_tentativas" and r["erro"]["mensagem"] == esperado
