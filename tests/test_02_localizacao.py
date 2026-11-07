@@ -1,6 +1,6 @@
 """Item 2 — "Usar minha localização" (posição emulada pelo navegador de teste)."""
 
-from conftest import esperar_lista, km_do_texto
+from conftest import esperar_lista, esperar_marcadores, km_do_texto
 
 VILA_HORTENCIA = {"latitude": -23.5036, "longitude": -47.4383}  # ao lado do Ecoponto Vila Hortência
 SAO_PAULO = {"latitude": -23.5505, "longitude": -46.6333}       # ~85 km de Sorocaba
@@ -12,8 +12,9 @@ def _distancias(page):
 
 def test_permitida_ordena_por_distancia_e_marca_o_mais_proximo(abrir, pontos_db):
     # Permissão já concedida: o site localiza sozinho ao abrir
-    p = abrir("/", largura=1280, altura=900, geo=VILA_HORTENCIA, permitir_geo=True)
+    p = abrir("/", largura=1280, altura=900, geo=VILA_HORTENCIA, permitir_geo=True, mapa=True)
     page = p.page
+    esperar_marcadores(page, len(pontos_db))
     page.wait_for_selector("#lista-pontos .selo--proximo", timeout=25000)
 
     distancias = _distancias(page)

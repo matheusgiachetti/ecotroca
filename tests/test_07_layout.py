@@ -2,7 +2,7 @@
 
 import pytest
 
-from conftest import esperar_lista, esperar_marcadores
+from conftest import esperar_lista
 
 LARGURAS = [(320, 640), (375, 812), (768, 1024), (1280, 900)]
 
@@ -45,7 +45,6 @@ def test_layout(abrir, pontos_db, largura, altura):
     p = abrir("/", largura=largura, altura=altura, toque=largura < 900)
     page = p.page
     esperar_lista(page)
-    esperar_marcadores(page, len(pontos_db))
     page.locator("#lista-pontos .ponto__cabeca").first.click()  # abre um cartão (botão "Como chegar")
     page.evaluate("document.querySelectorAll('details').forEach(d => d.open = true)")
     _percorrer(page)

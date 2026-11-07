@@ -7,6 +7,12 @@ Uso:
     BASE_URL=https://ecotroca-xi.vercel.app python -m pytest tests   # testa produção
 
 A porta 5173 é obrigatória localmente: é a única liberada na chave do Google Maps.
+
+COTA DO GOOGLE MAPS: enquanto o projeto do Google Cloud não tiver faturamento, a chave
+funciona como "demo key", com cota diária pequena (compartilhada com o site em produção).
+Por isso o mapa real só carrega nos testes que passam `mapa=True` (~7 por rodada); nos
+outros o script do Maps é bloqueado e a página mostra o aviso de mapa indisponível.
+Para pular também esses: SEM_MAPA=1 python -m pytest tests
 """
 
 import functools
@@ -90,15 +96,35 @@ def navegador(_pw):
     b.close()
 
 
+SEM_MAPA = os.environ.get("SEM_MAPA") == "1"
+COTA_ESGOTADA = "Demo Key limit reached"
+# Erros esperados quando o script do Maps é bloqueado de propósito
+ERROS_DO_BLOQUEIO = ("[Ecotroca] Erro ao carregar o mapa", "net::ERR_FAILED")
+_PAGINAS = {}
+
+
 class Pagina:
     """Página aberta + erros de console coletados."""
 
-    def __init__(self, contexto, page):
+    def __init__(self, contexto, page, mapa):
         self.contexto = contexto
         self.page = page
-        self.erros = []
-        page.on("console", lambda m: self.erros.append(m.text) if m.type == "error" else None)
-        page.on("pageerror", lambda e: self.erros.append(f"pageerror: {e}"))
+        self.mapa = mapa
+        self._erros = []
+        page.on("console", lambda m: self._erros.append(m.text) if m.type == "error" else None)
+        page.on("pageerror", lambda e: self._erros.append(f"pageerror: {e}"))
+        _PAGINAS[id(page)] = self
+
+    @property
+    def erros(self):
+        if self.mapa:
+            return list(self._erros)
+        return [e for e in self._erros if not any(t in e for t in ERROS_DO_BLOQUEIO)]
+
+    def falhar_se_cota_esgotada(self):
+        if any(COTA_ESGOTADA in e for e in self._erros):
+            pytest.fail("Cota diária do Google Maps esgotada (projeto sem faturamento). "
+                        "O mapa volta à meia-noite do Pacífico ou ao vincular o faturamento.")
 
 
 @pytest.fixture
@@ -107,7 +133,9 @@ def abrir(navegador):
     abertas = []
 
     def _abrir(caminho="/", *, largura=390, altura=844, geo=None, permitir_geo=False,
-               preparar=None, base=BASE_URL, movimento="no-preference", toque=False):
+               preparar=None, base=BASE_URL, movimento="no-preference", toque=False, mapa=False):
+        if mapa and SEM_MAPA:
+            pytest.skip("SEM_MAPA=1: teste que carrega o Google Maps de verdade")
         contexto = navegador.new_context(
             viewport={"width": largura, "height": altura},
             locale="pt-BR",
@@ -117,8 +145,10 @@ def abrir(navegador):
             has_touch=toque,
         )
         page = contexto.new_page()
-        pagina = Pagina(contexto, page)
+        pagina = Pagina(contexto, page, mapa)
         abertas.append(contexto)
+        if not mapa:
+            page.route("**/maps.googleapis.com/**", lambda r: r.abort())
         if preparar:
             preparar(page)
         page.goto(base + caminho, wait_until="domcontentloaded")
@@ -172,9 +202,16 @@ def esperar_lista(page, timeout=25000):
 
 
 def esperar_marcadores(page, quantidade, timeout=25000):
-    page.wait_for_function(
-        "n => document.querySelectorAll('#mapa-google .marcador').length === n", arg=quantidade, timeout=timeout
-    )
+    pagina = _PAGINAS.get(id(page))
+    assert pagina is None or pagina.mapa, "este teste precisa de abrir(..., mapa=True)"
+    try:
+        page.wait_for_function(
+            "n => document.querySelectorAll('#mapa-google .marcador').length === n", arg=quantidade, timeout=timeout
+        )
+    except Exception:
+        if pagina:
+            pagina.falhar_se_cota_esgotada()
+        raise
 
 
 def km_do_texto(texto):

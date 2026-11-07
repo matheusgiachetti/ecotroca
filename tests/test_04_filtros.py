@@ -12,7 +12,7 @@ def _clicar_filtro(page, nome):
 
 
 def test_filtros_na_lista_e_no_mapa(abrir, pontos_db):
-    p = abrir("/", largura=1280, altura=900)
+    p = abrir("/", largura=1280, altura=900, mapa=True)
     page = p.page
     esperar_lista(page)
     esperar_marcadores(page, len(pontos_db))
@@ -40,7 +40,7 @@ def test_filtros_na_lista_e_no_mapa(abrir, pontos_db):
 
 
 def test_estado_vazio_e_filtro_extra(abrir):
-    p = abrir("/", largura=1280, altura=900, preparar=responder_supabase(PONTOS_CONTROLADOS))
+    p = abrir("/", largura=1280, altura=900, preparar=responder_supabase(PONTOS_CONTROLADOS), mapa=True)
     page = p.page
     esperar_lista(page)
     esperar_marcadores(page, 2)

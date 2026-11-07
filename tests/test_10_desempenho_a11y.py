@@ -5,7 +5,7 @@ import io
 import pytest
 from PIL import Image
 
-from conftest import esperar_lista, esperar_marcadores
+from conftest import esperar_lista
 
 AXE = "https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.2/axe.min.js"
 
@@ -105,7 +105,6 @@ def test_axe_wcag_aa(abrir, pontos_db, largura):
     p = abrir("/", largura=largura, altura=900, movimento="reduce")
     page = p.page
     esperar_lista(page)
-    esperar_marcadores(page, len(pontos_db))
     page.locator("#lista-pontos .ponto__cabeca").first.click()
     page.evaluate("document.querySelectorAll('details').forEach(d => d.open = true)")
     page.add_script_tag(url=AXE)

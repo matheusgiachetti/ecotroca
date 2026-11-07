@@ -38,9 +38,10 @@ def _rotulos(detalhes):
 
 
 def test_detalhes_com_dados_reais(abrir, pontos_db):
-    p = abrir("/", largura=1280, altura=900)
+    p = abrir("/", largura=1280, altura=900, mapa=True)
     page = p.page
     esperar_lista(page)
+    esperar_marcadores(page, len(pontos_db))
     por_nome = {l["nome"]: l for l in pontos_db}
 
     for indice in range(page.locator("#lista-pontos .ponto").count()):
@@ -74,7 +75,7 @@ def test_detalhes_com_dados_reais(abrir, pontos_db):
 
 
 def test_telefone_campos_vazios_e_texto_do_banco_escapado(abrir):
-    p = abrir("/", largura=1280, altura=900, preparar=responder_supabase(PONTOS_CONTROLADOS))
+    p = abrir("/", largura=1280, altura=900, preparar=responder_supabase(PONTOS_CONTROLADOS), mapa=True)
     page = p.page
     esperar_lista(page)
     esperar_marcadores(page, 2)
