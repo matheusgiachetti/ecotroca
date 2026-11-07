@@ -1,0 +1,33 @@
+# Ecotroca — mantém o Supabase (plano gratuito) acordado.
+# O Supabase pausa projetos gratuitos com pouca consulta em 7 dias; quando isso acontece,
+# o site fica sem pontos de coleta. Uma leitura por dia basta para evitar a pausa.
+# Se a leitura falhar (projeto pausado ou fora do ar), o job falha e o GitHub avisa por e-mail.
+# Usa só a chave PÚBLICA (publishable), lida de js/config.js. Nenhum segredo envolvido.
+
+name: Manter o Supabase ativo
+
+on:
+  schedule:
+    - cron: "17 11 * * *" # todo dia, 8h17 em Brasília
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  consultar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lê os pontos de coleta com a chave pública
+        run: |
+          url=$(sed -n "s/^export const SUPABASE_URL = '\(.*\)';/\1/p" js/config.js)
+          chave=$(sed -n "s/^export const SUPABASE_ANON_KEY = '\(.*\)';/\1/p" js/config.js)
+          case "$chave" in sb_publishable_*) ;; *) echo "A chave em js/config.js não é publishable"; exit 1 ;; esac
+          status=$(curl -sS -o resposta.json -w '%{http_code}' --retry 3 --retry-delay 30 --retry-all-errors \
+            "$url/rest/v1/pontos_coleta?select=id&limit=10" -H "apikey: $chave")
+          echo "HTTP $status"
+          cat resposta.json; echo
+          test "$status" = 200
