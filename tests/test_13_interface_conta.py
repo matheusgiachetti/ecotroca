@@ -304,7 +304,8 @@ def test_limite_do_dia_aparece_em_portugues(abrir, pontos_db):
     page.locator("#descarte-tipos .opcao", has_text="Cabos").click()
     page.click("#descarte-confirmar")
     page.wait_for_function("document.querySelector('#descarte-erro').textContent.length > 0", timeout=20000)
-    assert page.locator("#descarte-erro").inner_text() == "O limite é de 30 itens por dia. Registre uma quantidade menor ou volte amanhã."
+    # O texto vem do banco (com o número da regra de supabase/05); o "quanto ainda cabe" depende da versão aplicada
+    assert page.locator("#descarte-erro").inner_text().startswith("O limite é de 30 itens por dia.")
 
 
 # ---------- sem login nada muda ----------

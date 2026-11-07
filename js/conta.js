@@ -14,19 +14,14 @@ import {
   listarTiposResiduo,
   registrarDescarte,
   meuResumo,
+  minhasMedalhas,
   modoDemonstracao,
 } from './data.js';
 import { obterPosicao } from './geo.js';
+import { obterRegras, regrasCarregadas } from './regras.js';
 
-// Mesmos limites do banco (nivel_por_pontos em supabase/05-rpc-pontos.sql), só para a barra de progresso.
-// O NOME do nível vem sempre do banco.
-const NIVEIS = [
-  { nome: 'Semente', de: 0 },
-  { nome: 'Broto', de: 50 },
-  { nome: 'Muda', de: 150 },
-  { nome: 'Árvore', de: 350 },
-  { nome: 'Floresta', de: 700 },
-];
+// Os níveis (para a barra de progresso), o raio e os limites vêm de regras_pontos() no banco
+// (js/regras.js): nenhum número de regra é repetido aqui.
 
 const $ = (seletor, raiz = document) => raiz.querySelector(seletor);
 
@@ -39,6 +34,8 @@ function criar(tag, classe, texto) {
 
 const formatoNumero = new Intl.NumberFormat('pt-BR');
 const pontosPorExtenso = (n) => `${formatoNumero.format(n)} ${n === 1 ? 'ponto' : 'pontos'}`;
+const juntarNomes = (nomes) =>
+  nomes.length < 2 ? nomes.join('') : `${nomes.slice(0, -1).join(', ')} e ${nomes[nomes.length - 1]}`;
 const formatarKg = (kg) =>
   `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: kg < 1 ? 3 : 2 }).format(kg)} kg`;
 
@@ -91,6 +88,10 @@ export function iniciarConta() {
     kg: $('#resumo-kg'),
     erro: $('#resumo-erro'),
   };
+  const medalhasEl = $('#resumo-medalhas');
+  const medalhasResumo = $('#medalhas-resumo');
+  const medalhasErro = $('#medalhas-erro');
+  const medalhasTentar = $('#medalhas-tentar');
 
   const dlgDescarte = $('#painel-descarte');
   const tituloDescarte = $('#painel-descarte-titulo');
@@ -102,6 +103,7 @@ export function iniciarConta() {
   const statusDescarte = $('#descarte-status');
   const botaoConfirmar = $('#descarte-confirmar');
   const resultadoEl = $('#descarte-resultado');
+  const medalhaEl = $('#descarte-resultado-medalha');
 
   // ---------- Estado ----------
   let sessao = null;
@@ -271,10 +273,74 @@ export function iniciarConta() {
   botaoConta.addEventListener('click', () => abrirConta(sessao ? 'conta' : 'entrar', botaoConta));
 
   // ---------- Minha conta ----------
-  function nivelDe(resumo) {
-    const indice = NIVEIS.findIndex((n) => n.nome === resumo.nivel);
+  function nivelDe(niveis, resumo) {
+    const indice = niveis.findIndex((n) => n.nome === resumo.nivel);
     return indice >= 0 ? indice : 0;
   }
+
+  /** Barra e frase do próximo nível. Sem as regras (falha de rede) mostra só o nível. */
+  function mostrarProgresso(r, regras) {
+    resumoEl.barra.max = 1;
+    resumoEl.barra.value = 0;
+    if (!regras || !regras.niveis.length) {
+      resumoEl.proximo.textContent = '';
+      return;
+    }
+    const indice = nivelDe(regras.niveis, r);
+    const atual = regras.niveis[indice];
+    const proximo = regras.niveis[indice + 1];
+    if (proximo) {
+      resumoEl.barra.max = proximo.de - atual.de;
+      resumoEl.barra.value = Math.min(Math.max(r.pontosTotal - atual.de, 0), proximo.de - atual.de);
+      resumoEl.proximo.textContent = `Faltam ${pontosPorExtenso(proximo.de - r.pontosTotal)} para o nível ${proximo.nome}.`;
+    } else {
+      resumoEl.barra.value = 1;
+      resumoEl.proximo.textContent = 'Você chegou ao nível mais alto.';
+    }
+  }
+
+  // ---------- Medalhas ----------
+  function desenharMedalhas(lista) {
+    const fuso = (regrasCarregadas() || {}).fuso;
+    const dataDe = (iso) => {
+      const d = new Date(iso);
+      if (!iso || Number.isNaN(d.getTime())) return '';
+      return d.toLocaleDateString('pt-BR', fuso ? { timeZone: fuso } : undefined);
+    };
+    medalhasEl.replaceChildren(
+      ...lista.map((m) => {
+        const item = criar('li', `medalha ${m.conquistada ? 'medalha--ganha' : 'medalha--bloqueada'}`);
+        const quando = m.conquistada ? dataDe(m.conquistadaEm) : '';
+        item.append(
+          criar('span', 'medalha__nome', m.nome),
+          criar('span', 'medalha__descricao', m.descricao),
+          criar('span', 'medalha__estado', m.conquistada ? `Conquistada${quando ? ` em ${quando}` : ''}` : 'Ainda não conquistada')
+        );
+        return item;
+      })
+    );
+    const ganhas = lista.filter((m) => m.conquistada).length;
+    medalhasResumo.textContent = `${ganhas} de ${lista.length} ${lista.length === 1 ? 'medalha conquistada' : 'medalhas conquistadas'}.`;
+  }
+
+  async function carregarMedalhas() {
+    medalhasErro.textContent = '';
+    medalhasTentar.hidden = true;
+    medalhasResumo.textContent = 'Carregando as medalhas…';
+    medalhasEl.setAttribute('aria-busy', 'true');
+    medalhasEl.replaceChildren();
+    try {
+      const [lista] = await Promise.all([minhasMedalhas(), obterRegras().catch(() => null)]);
+      desenharMedalhas(lista);
+    } catch (erro) {
+      medalhasResumo.textContent = '';
+      medalhasErro.textContent = erro.message || 'Não foi possível carregar as suas medalhas agora. Tente de novo.';
+      medalhasTentar.hidden = false;
+    } finally {
+      medalhasEl.setAttribute('aria-busy', 'false');
+    }
+  }
+  medalhasTentar.addEventListener('click', carregarMedalhas);
 
   async function carregarResumo() {
     resumoEl.erro.textContent = '';
@@ -283,20 +349,11 @@ export function iniciarConta() {
     resumoEl.barra.max = 1;
     resumoEl.barra.value = 0;
     for (const campo of ['pontos', 'descartes', 'itens', 'kg']) resumoEl[campo].textContent = '—';
+    carregarMedalhas();
     try {
-      const r = await meuResumo();
-      const atual = NIVEIS[nivelDe(r)];
-      const proximo = NIVEIS[nivelDe(r) + 1];
+      const [r, regras] = await Promise.all([meuResumo(), obterRegras().catch(() => null)]);
       resumoEl.nivel.textContent = r.nivel;
-      if (proximo) {
-        resumoEl.barra.max = proximo.de - atual.de;
-        resumoEl.barra.value = Math.min(Math.max(r.pontosTotal - atual.de, 0), proximo.de - atual.de);
-        resumoEl.proximo.textContent = `Faltam ${pontosPorExtenso(proximo.de - r.pontosTotal)} para o nível ${proximo.nome}.`;
-      } else {
-        resumoEl.barra.max = 1;
-        resumoEl.barra.value = 1;
-        resumoEl.proximo.textContent = 'Você chegou ao nível mais alto.';
-      }
+      mostrarProgresso(r, regras);
       resumoEl.pontos.textContent = formatoNumero.format(r.pontosTotal);
       resumoEl.descartes.textContent = formatoNumero.format(r.descartes);
       resumoEl.itens.textContent = formatoNumero.format(r.itens);
@@ -320,6 +377,8 @@ export function iniciarConta() {
   function resetarDescarte() {
     formDescarte.hidden = false;
     resultadoEl.hidden = true;
+    medalhaEl.hidden = true;
+    medalhaEl.textContent = '';
     quantidadeEl.value = '1';
     erroDescarte.textContent = '';
     statusDescarte.textContent = '';
@@ -329,9 +388,10 @@ export function iniciarConta() {
   function atualizarPrevia() {
     const escolhido = $('input[name="tipo"]:checked', formDescarte);
     const quantidade = Number(quantidadeEl.value);
+    const maximo = (regrasCarregadas() || {}).quantidadeMax || Infinity;
     const tipo = escolhido && tipos && tipos.find((t) => String(t.id) === escolhido.value);
     previaEl.textContent =
-      tipo && Number.isInteger(quantidade) && quantidade >= 1 && quantidade <= 10
+      tipo && Number.isInteger(quantidade) && quantidade >= 1 && quantidade <= maximo
         ? `Esse descarte vale ${pontosPorExtenso(tipo.pontos * quantidade)}.`
         : '';
   }
@@ -376,6 +436,14 @@ export function iniciarConta() {
     }
   }
 
+  /** Raio e quantidade máxima vêm do banco; se a leitura falhar, o próprio banco valida no envio. */
+  function aplicarRegrasNoFormulario(regras) {
+    quantidadeEl.max = String(regras.quantidadeMax);
+    $('#descarte-quantidade-faixa').textContent = `(1 a ${regras.quantidadeMax})`;
+    $('#descarte-nota').textContent =
+      `Ao confirmar, o site pede a sua localização para conferir que você está a até ${formatoNumero.format(regras.raioM)} m do ponto. Ela não é guardada.`;
+  }
+
   function abrirDescarte(ponto, opener, fallback) {
     const volta = fallback || (() => $(`.ponto[data-id="${CSS.escape(ponto.id)}"] .ponto__cabeca`));
     if (!sessao) {
@@ -388,6 +456,7 @@ export function iniciarConta() {
     resetarDescarte();
     abrirDialog(dlgDescarte, opener, volta);
     carregarTipos();
+    obterRegras().then(aplicarRegrasNoFormulario, () => {});
   }
 
   formDescarte.addEventListener('submit', async (e) => {
@@ -402,8 +471,9 @@ export function iniciarConta() {
       erroDescarte.textContent = 'Escolha o tipo de resíduo.';
       return;
     }
-    if (!Number.isInteger(quantidade) || quantidade < 1 || quantidade > 10) {
-      erroDescarte.textContent = 'A quantidade deve ser de 1 a 10 itens.';
+    const maximo = (regrasCarregadas() || {}).quantidadeMax;
+    if (!Number.isInteger(quantidade) || quantidade < 1 || (maximo && quantidade > maximo)) {
+      erroDescarte.textContent = maximo ? `A quantidade deve ser de 1 a ${maximo} itens.` : 'Informe a quantidade de itens.';
       return;
     }
 
@@ -424,10 +494,14 @@ export function iniciarConta() {
         const r = await registrarDescarte(pontoAtual.id, Number(escolhido.value), quantidade, posicao.lat, posicao.lng);
         $('#descarte-resultado-texto').textContent =
           `+${pontosPorExtenso(r.pontosGanhos)}. Você agora tem ${pontosPorExtenso(r.pontosTotal)}, nível ${r.nivel}.`;
-        $('#descarte-resultado-peso').textContent = `Peso estimado deste descarte: ${formatarKg(r.pesoKgEstimado)} (estimativa).`;
+        $('#descarte-resultado-peso').textContent =
+          `Peso estimado deste descarte: ${formatarKg(r.pesoKgEstimado)} (estimativa), a partir do peso médio por item, por tipo de resíduo.`;
+        const novas = r.medalhasNovas || [];
+        medalhaEl.hidden = !novas.length;
+        medalhaEl.textContent = novas.length ? `${novas.length === 1 ? 'Nova medalha' : 'Novas medalhas'}: ${juntarNomes(novas)}.` : '';
         formDescarte.hidden = true;
         resultadoEl.hidden = false;
-        anunciar(`Descarte registrado. ${$('#descarte-resultado-texto').textContent}`);
+        anunciar(`Descarte registrado. ${$('#descarte-resultado-texto').textContent}${novas.length ? ` ${medalhaEl.textContent}` : ''}`);
         document.dispatchEvent(new CustomEvent('ecotroca:pontos')); // o ranking se atualiza
         $('#descarte-outro').focus();
       } catch (erro) {

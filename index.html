@@ -55,6 +55,7 @@
           <li><a href="#inicio">Início</a></li>
           <li><a href="#mapa">Mapa</a></li>
           <li data-ranking-nav><a href="#ranking">Ranking</a></li>
+          <li data-pontos-nav><a href="#pontos">Pontos</a></li>
           <li><a href="#como-funciona">Como funciona</a></li>
           <li><a href="#o-que-descartar">O que descartar</a></li>
           <li><a href="#duvidas">Dúvidas</a></li>
@@ -152,6 +153,18 @@
           <li class="lista__estado">Carregando o ranking…</li>
         </ol>
         <div class="ranking__minha" id="ranking-minha" hidden></div>
+      </div>
+    </section>
+
+    <!-- ============ COMO OS PONTOS FUNCIONAM (valores lidos do banco por js/regras.js) ============ -->
+    <section class="secao regras" id="pontos" aria-labelledby="pontos-titulo">
+      <div class="regras__lado">
+        <p class="sobretitulo">Pontos e medalhas</p>
+        <h2 id="pontos-titulo">Como os pontos funcionam</h2>
+        <p class="regras__intro">Todo descarte confirmado perto de um ponto de coleta vale pontos. Os valores abaixo vêm direto do sistema, então são sempre os que valem hoje.</p>
+      </div>
+      <div class="regras__corpo" id="regras-corpo" aria-busy="true">
+        <p class="lista__estado">Carregando as regras…</p>
       </div>
     </section>
 
@@ -350,7 +363,15 @@
           <div><dt>Itens</dt><dd id="resumo-itens">—</dd></div>
           <div><dt>Peso estimado</dt><dd id="resumo-kg">—</dd></div>
         </dl>
+        <p class="resumo__nota">Peso estimado: peso médio por item, por tipo de resíduo. Não é uma medição.</p>
         <p class="form__erro" role="alert" id="resumo-erro"></p>
+
+        <h3 class="resumo__subtitulo">Medalhas</h3>
+        <p class="resumo__proximo" id="medalhas-resumo" aria-live="polite"></p>
+        <ul class="medalhas" id="resumo-medalhas" aria-busy="true"></ul>
+        <p class="form__erro" role="alert" id="medalhas-erro"></p>
+        <button class="botao botao--suave" type="button" id="medalhas-tentar" hidden>Tentar de novo</button>
+
         <button class="botao botao--suave" type="button" data-conta-sair-painel>Sair</button>
       </section>
     </div>
@@ -373,11 +394,11 @@
           <div class="opcoes" id="descarte-tipos" aria-busy="true"></div>
         </fieldset>
         <div class="campo campo--curto">
-          <label for="descarte-quantidade">Quantidade de itens (1 a 10)</label>
-          <input id="descarte-quantidade" name="quantidade" type="number" min="1" max="10" step="1" value="1" inputmode="numeric">
+          <label for="descarte-quantidade">Quantidade de itens <span id="descarte-quantidade-faixa"></span></label>
+          <input id="descarte-quantidade" name="quantidade" type="number" min="1" step="1" value="1" inputmode="numeric">
         </div>
         <p class="descarte__previa" id="descarte-previa"></p>
-        <p class="painel__nota">Ao confirmar, o site pede a sua localização para conferir que você está a até 200 m do ponto. Ela não é guardada.</p>
+        <p class="painel__nota" id="descarte-nota">Ao confirmar, o site pede a sua localização para conferir que você está perto do ponto. Ela não é guardada.</p>
         <p class="form__erro" role="alert" id="descarte-erro"></p>
         <p class="form__status" role="status" aria-live="polite" id="descarte-status"></p>
         <button class="botao" type="submit" id="descarte-confirmar">Confirmar descarte</button>
@@ -387,6 +408,7 @@
         <p class="resultado__titulo">Descarte registrado</p>
         <p class="resultado__texto" id="descarte-resultado-texto"></p>
         <p class="resultado__peso" id="descarte-resultado-peso"></p>
+        <p class="resultado__medalha" id="descarte-resultado-medalha" hidden></p>
         <div class="ponto__acoes">
           <button class="botao" type="button" id="descarte-outro">Registrar outro</button>
           <button class="botao botao--suave" type="button" data-fechar>Fechar</button>

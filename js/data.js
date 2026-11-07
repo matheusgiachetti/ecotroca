@@ -86,19 +86,22 @@ export class ErroEcotroca extends Error {
 export const MENSAGEM_APELIDO = 'Esse apelido não é válido ou já está em uso.';
 export const SENHA_MINIMA = 6;
 
-// Chave = HINT que o banco devolve nas regras de registrar_descarte() e meu_resumo()
+// Chave = HINT que o banco devolve nas regras de registrar_descarte() e meu_resumo().
+// Os números das regras (raio, limites, quantidade) NÃO ficam aqui: nas mensagens abaixo marcadas
+// com (*) o site mostra o texto que o próprio banco devolve, já com o número vindo de regras_limites().
 const MENSAGENS_DO_BANCO = {
   nao_logado: 'Entre na sua conta para continuar.',
-  longe_do_ponto: 'Você precisa estar a até 200 m do ponto de coleta para registrar o descarte.',
-  limite_registros: 'Você já fez 5 registros hoje. Volte amanhã.',
-  limite_itens: 'O limite é de 30 itens por dia. Registre uma quantidade menor ou volte amanhã.',
-  quantidade_invalida: 'A quantidade deve ser de 1 a 10 itens.',
+  longe_do_ponto: 'Você está longe demais do ponto de coleta para registrar o descarte.', // (*)
+  limite_registros: 'Você já atingiu o limite de registros de hoje. Volte amanhã.', // (*)
+  limite_itens: 'Você já atingiu o limite de itens de hoje. Registre menos itens ou volte amanhã.', // (*)
+  quantidade_invalida: 'A quantidade informada não é válida.', // (*)
   ponto_inexistente: 'Não encontramos esse ponto de coleta.',
   tipo_inexistente: 'Não encontramos esse tipo de resíduo.',
   coordenadas_invalidas: 'Não foi possível ler a sua localização.',
   perfil_inexistente: 'Não encontramos o seu perfil. Saia e entre de novo.',
   periodo_invalido: 'Período inválido. Escolha semana, mês ou geral.',
 };
+const USAR_TEXTO_DO_BANCO = ['longe_do_ponto', 'limite_registros', 'limite_itens', 'quantidade_invalida'];
 const ERRO_GENERICO = 'Algo deu errado. Verifique sua conexão e tente de novo.';
 
 const REGRA_APELIDO = /^[A-Za-z0-9_]{3,20}$/;
@@ -123,7 +126,10 @@ async function clienteDeConta() {
 function traduzirErro(erro, padrao = ERRO_GENERICO) {
   if (erro instanceof ErroEcotroca) return erro;
   const hint = erro && erro.hint;
-  if (hint && MENSAGENS_DO_BANCO[hint]) return new ErroEcotroca(hint, MENSAGENS_DO_BANCO[hint]);
+  if (hint && MENSAGENS_DO_BANCO[hint]) {
+    const doBanco = USAR_TEXTO_DO_BANCO.includes(hint) && typeof erro.message === 'string' && erro.message.trim();
+    return new ErroEcotroca(hint, doBanco || MENSAGENS_DO_BANCO[hint]);
+  }
   // Limite de requisições do Auth (muitas tentativas de cadastro ou login em pouco tempo)
   if (erro && (erro.status === 429 || erro.code === 'over_request_rate_limit' || erro.code === 'over_email_send_rate_limit')) {
     return new ErroEcotroca('muitas_tentativas', 'Muitas tentativas em pouco tempo. Espere alguns minutos e tente de novo.');
@@ -220,8 +226,9 @@ export async function listarTiposResiduo() {
 }
 
 /**
- * Registra um descarte. lat/lng servem só para o banco conferir a distância (até 200 m)
- * e NÃO são guardados. Devolve { descarteId, pontosGanhos, pontosTotal, nivel, pesoKgEstimado }.
+ * Registra um descarte. lat/lng servem só para o banco conferir a distância (o raio vem das regras do banco)
+ * e NÃO são guardados. Devolve { descarteId, pontosGanhos, pontosTotal, nivel, pesoKgEstimado, medalhasNovas },
+ * onde medalhasNovas são os NOMES das medalhas conquistadas nesta chamada (quem concede é o banco).
  */
 export async function registrarDescarte(pontoId, tipoId, quantidade, lat, lng) {
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
@@ -242,6 +249,7 @@ export async function registrarDescarte(pontoId, tipoId, quantidade, lat, lng) {
     pontosTotal: data.pontos_total,
     nivel: data.nivel,
     pesoKgEstimado: Number(data.peso_kg_estimado),
+    medalhasNovas: Array.isArray(data.medalhas_novas) ? data.medalhas_novas.filter((n) => typeof n === 'string') : [],
   };
 }
 
@@ -256,6 +264,40 @@ export async function meuResumo() {
     descartes: data.descartes,
     itens: data.itens,
     kgEstimados: Number(data.kg_estimados),
+  };
+}
+
+/** Medalhas da pessoa logada: [{ codigo, nome, descricao, conquistada, conquistadaEm }]. */
+export async function minhasMedalhas() {
+  const cliente = await clienteDeConta();
+  const { data, error } = await cliente.rpc('minhas_medalhas');
+  if (error) throw traduzirErro(error, 'Não foi possível carregar as suas medalhas agora. Tente de novo.');
+  return (data || []).map((m) => ({
+    codigo: m.codigo,
+    nome: m.nome,
+    descricao: m.descricao,
+    conquistada: m.conquistada === true,
+    conquistadaEm: m.conquistada_em || null,
+  }));
+}
+
+/**
+ * Regras públicas (supabase/07-medalhas.sql, regras_pontos): tipos com pontos, raio, limites, fuso,
+ * níveis e medalhas. É a ÚNICA fonte desses números para a página.
+ */
+export async function regrasPontos() {
+  const cliente = await clienteDeConta();
+  const { data, error } = await cliente.rpc('regras_pontos');
+  if (error || !data) throw traduzirErro(error || new Error('sem dados'), 'Não foi possível carregar as regras agora. Tente de novo.');
+  return {
+    tipos: (data.tipos || []).map((t) => ({ nome: t.nome, pontos: t.pontos })),
+    raioM: data.raio_m,
+    maxRegistros: data.max_registros,
+    maxItens: data.max_itens,
+    quantidadeMax: data.quantidade_max,
+    fuso: data.fuso,
+    niveis: (data.niveis || []).map((n) => ({ nome: n.nome, de: n.de })),
+    medalhas: (data.medalhas || []).map((m) => ({ nome: m.nome, descricao: m.descricao })),
   };
 }
 

@@ -17,6 +17,7 @@ import {
 import { iniciarMapa } from './map.js';
 import { iniciarConta } from './conta.js';
 import { iniciarRanking } from './ranking.js';
+import { iniciarRegras } from './regras.js';
 
 document.documentElement.classList.add('js');
 
@@ -474,6 +475,7 @@ function iniciar() {
   iniciarMenu();
   conta = iniciarConta();
   iniciarRanking();
+  iniciarRegras();
   iniciarFeedback();
   iniciarAnimacoes();
 

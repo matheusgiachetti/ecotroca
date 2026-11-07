@@ -812,7 +812,9 @@ body:has(dialog[open]) { overflow: hidden; }
 
 .resultado__titulo { font-family: var(--fonte-titulo); font-size: 1.15rem; font-weight: 650; color: var(--verde-700); }
 .resultado__texto { margin: 0.5rem 0 0.75rem; font-family: var(--fonte-titulo); font-size: clamp(1.6rem, 5vw, 2rem); font-weight: 500; line-height: 1.2; }
-.resultado__peso { margin-bottom: 1.75rem; color: var(--tinta-2); }
+.resultado__peso { margin-bottom: 1.25rem; color: var(--tinta-2); }
+.resultado__medalha { margin: 0 0 1.75rem; font-family: var(--fonte-titulo); font-size: 1.25rem; font-weight: 650; color: var(--verde-700); }
+.resultado__medalha[hidden] { display: none; }
 
 /* Minha conta */
 .resumo__rotulo { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--tinta-2); }
@@ -832,7 +834,7 @@ body:has(dialog[open]) { overflow: hidden; }
 .nivel__barra::-webkit-progress-value { background: var(--verde-700); }
 .nivel__barra::-moz-progress-bar { background: var(--verde-700); }
 .resumo__proximo { margin: 0.6rem 0 2rem; color: var(--tinta-2); }
-.resumo__dados { display: grid; gap: 0; margin: 0 0 2rem; border-top: 1px solid var(--linha); }
+.resumo__dados { display: grid; gap: 0; margin: 0 0 0.75rem; border-top: 1px solid var(--linha); }
 .resumo__dados div { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 0.9rem 0; border-bottom: 1px solid var(--linha); }
 .resumo__dados dt { color: var(--tinta-2); }
 .resumo__dados dd { margin: 0; font-family: var(--fonte-titulo); font-size: 1.2rem; font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
@@ -882,6 +884,40 @@ body:has(dialog[open]) { overflow: hidden; }
 @media (min-width: 900px) {
   .ranking { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 4rem; align-items: start; }
   .ranking__lado { position: sticky; top: calc(var(--altura-topo) + 2rem); }
+}
+
+/* Medalhas (Minha conta): lista tipográfica, sem caixas. Conquistadas em destaque, bloqueadas em texto apagado. */
+.resumo__nota { margin: 0 0 2rem; color: var(--tinta-2); font-size: 0.92rem; }
+.resumo__subtitulo { margin: 0 0 0.25rem; font-family: var(--fonte-titulo); font-size: 1.3rem; font-weight: 600; }
+.medalhas { margin: 0 0 1.25rem; padding: 0; list-style: none; border-top: 1px solid var(--linha); }
+.medalha { display: grid; gap: 0.1rem; padding: 0.9rem 0; border-bottom: 1px solid var(--linha); }
+.medalha__nome { font-family: var(--fonte-titulo); font-size: 1.15rem; font-weight: 600; line-height: 1.25; }
+.medalha__descricao, .medalha__estado { font-size: 0.92rem; }
+.medalha--ganha .medalha__nome { color: var(--verde-800); }
+.medalha--ganha .medalha__estado { color: var(--verde-700); font-weight: 600; }
+.medalha--bloqueada { color: var(--tinta-2); }
+.medalha--bloqueada .medalha__nome { font-weight: 500; }
+
+/* ---------- Como os pontos funcionam ---------- */
+.regras { display: grid; gap: 2rem; }
+.regras[hidden] { display: none; }
+.regras__intro { margin: 1rem 0 0; max-width: 38ch; color: var(--tinta-2); }
+.regras__corpo { display: grid; gap: 2.75rem; align-content: start; }
+.regras__titulo { margin: 0; font-family: var(--fonte-titulo); font-size: 1.45rem; font-weight: 600; line-height: 1.2; }
+.regras__nota { margin: 0.25rem 0 1rem; max-width: 52ch; color: var(--tinta-2); }
+.regras__lista { margin: 0.75rem 0 0; padding: 0; list-style: none; border-top: 1px solid var(--linha); }
+.regras__nota + .regras__lista { margin-top: 0; }
+.regras__lista > div,
+.regras__lista > li { padding: 0.85rem 0; border-bottom: 1px solid var(--linha); }
+.regras__lista > div { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.regras__lista dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.regras__lista--simples > li { display: grid; gap: 0.1rem; max-width: 62ch; }
+.regras__nome { font-family: var(--fonte-titulo); font-size: 1.15rem; font-weight: 600; }
+.regras__valor { color: var(--tinta-2); }
+
+@media (min-width: 900px) {
+  .regras { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 4rem; align-items: start; }
+  .regras__lado { position: sticky; top: calc(var(--altura-topo) + 2rem); }
 }
 
 /* ---------- Movimento reduzido ---------- */

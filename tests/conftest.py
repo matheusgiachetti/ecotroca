@@ -108,6 +108,36 @@ def _ranking_vazio(route):
         route.fulfill(status=200, headers={**cors, "content-type": "application/json"}, body="[]")
 
 
+def responder_rpc(corpo):
+    """Rota do Playwright que responde a um RPC do Supabase com `corpo` (JSON), com CORS."""
+
+    def tratar(route):
+        cors = {"access-control-allow-origin": "*", "access-control-allow-headers": "*", "access-control-allow-methods": "POST, OPTIONS"}
+        if route.request.method == "OPTIONS":
+            route.fulfill(status=204, headers=cors)
+        else:
+            route.fulfill(status=200, headers={**cors, "content-type": "application/json"}, body=json.dumps(corpo))
+
+    return tratar
+
+
+# Respostas padrão de regras_pontos() e minhas_medalhas() (os mesmos valores do supabase/05 e 07)
+REGRAS_PADRAO = {
+    "tipos": [{"nome": "Pilhas e baterias", "pontos": 5}, {"nome": "Cabos e carregadores", "pontos": 5}, {"nome": "Celulares", "pontos": 20},
+              {"nome": "Computadores e periféricos", "pontos": 50}, {"nome": "Eletrodomésticos pequenos", "pontos": 30}],
+    "raio_m": 200, "max_registros": 5, "max_itens": 30, "quantidade_max": 10, "fuso": "America/Sao_Paulo",
+    "niveis": [{"nome": "Semente", "de": 0}, {"nome": "Broto", "de": 50}, {"nome": "Muda", "de": 150},
+               {"nome": "Árvore", "de": 350}, {"nome": "Floresta", "de": 700}],
+    "medalhas": [{"nome": "Primeiro descarte", "descricao": "Registrou o primeiro descarte."},
+                 {"nome": "10 itens descartados", "descricao": "Descartou 10 itens, somando todos os registros."},
+                 {"nome": "3 tipos de resíduo", "descricao": "Descartou 3 tipos diferentes de resíduo."},
+                 {"nome": "100 pontos", "descricao": "Chegou a 100 pontos."}],
+}
+MEDALHAS_PADRAO = [
+    {"codigo": c, "nome": m["nome"], "descricao": m["descricao"], "conquistada": False, "conquistada_em": None}
+    for c, m in zip(["primeiro_descarte", "dez_itens", "tres_tipos", "cem_pontos"], REGRAS_PADRAO["medalhas"])
+]
+
 SEM_MAPA = os.environ.get("SEM_MAPA") == "1"
 COTA_ESGOTADA = "Demo Key limit reached"
 # Erros esperados quando o script do Maps é bloqueado de propósito
@@ -145,7 +175,7 @@ def abrir(navegador):
     abertas = []
 
     def _abrir(caminho="/", *, largura=390, altura=844, geo=None, permitir_geo=False,
-               preparar=None, base=BASE_URL, movimento="no-preference", toque=False, mapa=False, ranking_real=False):
+               preparar=None, base=BASE_URL, movimento="no-preference", toque=False, mapa=False, ranking_real=False, regras_reais=False):
         if mapa and SEM_MAPA:
             pytest.skip("SEM_MAPA=1: teste que carrega o Google Maps de verdade")
         contexto = navegador.new_context(
@@ -166,6 +196,11 @@ def abrir(navegador):
             # não dependam do estado do banco real. test_14 simula dados próprios ou usa ranking_real=True.
             page.route("**/rest/v1/rpc/ranking", _ranking_vazio)
             page.route("**/rest/v1/rpc/minha_posicao", _ranking_vazio)
+        if not regras_reais:
+            # Idem para as regras e as medalhas (supabase/07): valores fixos, sem depender do SQL aplicado.
+            # test_16 troca por dados próprios (via `preparar`) ou usa regras_reais=True.
+            page.route("**/rest/v1/rpc/regras_pontos", responder_rpc(REGRAS_PADRAO))
+            page.route("**/rest/v1/rpc/minhas_medalhas", responder_rpc(MEDALHAS_PADRAO))
         if preparar:
             preparar(page)
         page.goto(base + caminho, wait_until="domcontentloaded")
